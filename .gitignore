@@ -27,6 +27,7 @@ go.work.sum
 # env file
 .env
 go-elasticsearch-8.18/
+project_documents/
 # Editor/IDE
 # .idea/
 # .vscode/

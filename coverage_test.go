@@ -67,7 +67,7 @@ func TestMatchPhrasePrefixCoverage(t *testing.T) {
 // TestCombinedQueries tests combining different query types
 func TestCombinedQueries(t *testing.T) {
 	// Test Bool query with different match types
-	query, err := NewQuery(
+	query := NewQuery(
 		Bool(
 			Must(
 				Match("title", "elasticsearch"),
@@ -79,9 +79,6 @@ func TestCombinedQueries(t *testing.T) {
 			),
 		),
 	)
-	if err != nil {
-		t.Errorf("Combined query should not error: %v", err)
-	}
 	if query.Bool == nil {
 		t.Error("Bool query should not be nil")
 	}
@@ -96,7 +93,7 @@ func TestCombinedQueries(t *testing.T) {
 // TestRangeQueryIntegration tests Range query integration
 func TestRangeQueryIntegration(t *testing.T) {
 	// Test NumberRange in Bool query
-	query, err := NewQuery(
+	query := NewQuery(
 		Bool(
 			Filter(
 				NumberRange("age").Gte(18).Lt(65).Build(),
@@ -104,9 +101,6 @@ func TestRangeQueryIntegration(t *testing.T) {
 			),
 		),
 	)
-	if err != nil {
-		t.Errorf("Range query integration should not error: %v", err)
-	}
 	if query.Bool == nil {
 		t.Error("Bool query should not be nil")
 	}
@@ -118,30 +112,21 @@ func TestRangeQueryIntegration(t *testing.T) {
 // TestEdgeCases tests edge cases and error conditions
 func TestEdgeCases(t *testing.T) {
 	// Test with mixed nil and valid options
-	query, err := NewQuery(
+	query := NewQuery(
 		Term("status", "published"),
 	)
-	if err != nil {
-		t.Errorf("Valid options should not error: %v", err)
-	}
 	if query.Term == nil {
 		t.Error("Term query should not be nil")
 	}
 	
 	// Test Range with zero values
-	query, err = NewQuery(NumberRange("count").Gte(0.0).Lt(0.0).Build())
-	if err != nil {
-		t.Errorf("Range with zero values should not error: %v", err)
-	}
+	query = NewQuery(NumberRange("count").Gte(0.0).Lt(0.0).Build())
 	if query.Range == nil {
 		t.Error("Range query should not be nil")
 	}
 	
 	// Test Terms with single value
-	query, err = NewQuery(Terms("category", "single"))
-	if err != nil {
-		t.Errorf("Terms with single value should not error: %v", err)
-	}
+	query = NewQuery(Terms("category", "single"))
 	if query.Terms == nil {
 		t.Error("Terms query should not be nil")
 	}

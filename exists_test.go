@@ -39,17 +39,12 @@ func TestExists(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			query, err := NewQuery(Exists(tt.field))
+			query := NewQuery(Exists(tt.field))
 			
 			if tt.wantErr {
-				if err == nil {
+				if query.Exists == nil {
 					t.Errorf("Exists() expected error, got nil")
 				}
-				return
-			}
-			
-			if err != nil {
-				t.Errorf("Exists() unexpected error: %v", err)
 				return
 			}
 			
@@ -67,7 +62,7 @@ func TestExists(t *testing.T) {
 
 func TestExistsWithOtherQueries(t *testing.T) {
 	// Test combining Exists with Bool query
-	query, err := NewQuery(
+	query := NewQuery(
 		Bool(
 			Must(
 				Exists("user.name"),
@@ -75,11 +70,6 @@ func TestExistsWithOtherQueries(t *testing.T) {
 			),
 		),
 	)
-	
-	if err != nil {
-		t.Errorf("Exists() with Bool query unexpected error: %v", err)
-		return
-	}
 	
 	if query.Bool == nil {
 		t.Errorf("Bool query is nil")
@@ -113,16 +103,13 @@ func TestExistsWithOtherQueries(t *testing.T) {
 // Benchmark tests for Exists query
 func BenchmarkExists(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		_, err := NewQuery(Exists("user.name"))
-		if err != nil {
-			b.Errorf("Exists() unexpected error: %v", err)
-		}
+		_ = NewQuery(Exists("user.name"))
 	}
 }
 
 func BenchmarkExistsWithBool(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		_, err := NewQuery(
+		_ = NewQuery(
 			Bool(
 				Must(
 					Exists("user.name"),
@@ -130,8 +117,5 @@ func BenchmarkExistsWithBool(b *testing.B) {
 				),
 			),
 		)
-		if err != nil {
-			b.Errorf("Exists() with Bool unexpected error: %v", err)
-		}
 	}
 } 

@@ -10,10 +10,7 @@ import (
 func BenchmarkSimpleQuery(b *testing.B) {
 	b.Run("ESB_Term", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			_, err := NewQuery(Term("status", "published"))
-			if err != nil {
-				b.Errorf("ESB Term query failed: %v", err)
-			}
+			_ = NewQuery(Term("status", "published"))
 		}
 	})
 	
@@ -35,10 +32,7 @@ func BenchmarkSimpleQuery(b *testing.B) {
 func BenchmarkMatchQueryConstruction(b *testing.B) {
 	b.Run("ESB_Match", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			_, err := NewQuery(Match("title", "elasticsearch"))
-			if err != nil {
-				b.Errorf("ESB Match query failed: %v", err)
-			}
+			_ = NewQuery(Match("title", "elasticsearch"))
 		}
 	})
 	
@@ -60,10 +54,7 @@ func BenchmarkMatchQueryConstruction(b *testing.B) {
 func BenchmarkRangeQuery(b *testing.B) {
 	b.Run("ESB_Range", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			_, err := NewQuery(NumberRange("age").Gte(18.0).Lt(65.0).Build())
-			if err != nil {
-				b.Errorf("ESB Range query failed: %v", err)
-			}
+			_ = NewQuery(NumberRange("age").Gte(18.0).Lt(65.0).Build())
 		}
 	})
 	
@@ -86,7 +77,7 @@ func BenchmarkRangeQuery(b *testing.B) {
 func BenchmarkBoolQueryConstruction(b *testing.B) {
 	b.Run("ESB_Bool", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			_, err := NewQuery(
+			_ = NewQuery(
 				Bool(
 					Must(
 						Match("title", "elasticsearch"),
@@ -98,9 +89,6 @@ func BenchmarkBoolQueryConstruction(b *testing.B) {
 					),
 				),
 			)
-			if err != nil {
-				b.Errorf("ESB Bool query failed: %v", err)
-			}
 		}
 	})
 	
@@ -151,7 +139,7 @@ func BenchmarkBoolQueryConstruction(b *testing.B) {
 func BenchmarkComplexQuery(b *testing.B) {
 	b.Run("ESB_Complex", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			_, err := NewQuery(
+			_ = NewQuery(
 				Bool(
 					Must(
 						Match("title", "elasticsearch guide"),
@@ -173,9 +161,6 @@ func BenchmarkComplexQuery(b *testing.B) {
 					),
 				),
 			)
-			if err != nil {
-				b.Errorf("ESB Complex query failed: %v", err)
-			}
 		}
 	})
 	
@@ -269,7 +254,7 @@ func BenchmarkComplexQuery(b *testing.B) {
 func BenchmarkNestedBoolQuery(b *testing.B) {
 	b.Run("ESB_NestedBool", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			_, err := NewQuery(
+			_ = NewQuery(
 				Bool(
 					Must(
 						Bool(
@@ -290,9 +275,6 @@ func BenchmarkNestedBoolQuery(b *testing.B) {
 					),
 				),
 			)
-			if err != nil {
-				b.Errorf("ESB Nested Bool query failed: %v", err)
-			}
 		}
 	})
 	
@@ -362,16 +344,13 @@ func BenchmarkMatchWithOptions(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			boost := float32(2.0)
 			analyzer := "standard"
-			_, err := NewQuery(
+			_ = NewQuery(
 				MatchWithOptions("title", "elasticsearch guide", MatchOptions{
 					Boost:    &boost,
 					Analyzer: &analyzer,
 					Operator: &operator.And,
 				}),
 			)
-			if err != nil {
-				b.Errorf("ESB MatchWithOptions query failed: %v", err)
-			}
 		}
 	})
 	
@@ -399,10 +378,7 @@ func BenchmarkMatchWithOptions(b *testing.B) {
 func BenchmarkTermsQuery(b *testing.B) {
 	b.Run("ESB_Terms", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			_, err := NewQuery(Terms("category", "tech", "science", "programming"))
-			if err != nil {
-				b.Errorf("ESB Terms query failed: %v", err)
-			}
+			_ = NewQuery(Terms("category", "tech", "science", "programming"))
 		}
 	})
 	
@@ -424,10 +400,7 @@ func BenchmarkTermsQuery(b *testing.B) {
 func BenchmarkExistsQuery(b *testing.B) {
 	b.Run("ESB_Exists", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			_, err := NewQuery(Exists("author"))
-			if err != nil {
-				b.Errorf("ESB Exists query failed: %v", err)
-			}
+			_ = NewQuery(Exists("author"))
 		}
 	})
 	
@@ -447,7 +420,7 @@ func BenchmarkExistsQuery(b *testing.B) {
 func BenchmarkRangeWithOptions(b *testing.B) {
 	b.Run("ESB_RangeWithOptions", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			_, err := NewQuery(
+			_ = NewQuery(
 				DateRange("timestamp").
 					Gte("2023-01-01").
 					Lte("2023-12-31").
@@ -456,9 +429,6 @@ func BenchmarkRangeWithOptions(b *testing.B) {
 					Boost(1.5).
 					Build(),
 			)
-			if err != nil {
-				b.Errorf("ESB Range with options query failed: %v", err)
-			}
 		}
 	})
 	
@@ -488,7 +458,7 @@ func BenchmarkMemoryAllocation(b *testing.B) {
 	b.Run("ESB_Memory", func(b *testing.B) {
 		b.ReportAllocs()
 		for i := 0; i < b.N; i++ {
-			_, err := NewQuery(
+			_ = NewQuery(
 				Bool(
 					Must(
 						Match("title", "elasticsearch"),
@@ -496,9 +466,6 @@ func BenchmarkMemoryAllocation(b *testing.B) {
 					),
 				),
 			)
-			if err != nil {
-				b.Errorf("ESB Memory test failed: %v", err)
-			}
 		}
 	})
 	
@@ -535,7 +502,7 @@ func BenchmarkConcurrentUsage(b *testing.B) {
 	b.Run("ESB_Concurrent", func(b *testing.B) {
 		b.RunParallel(func(pb *testing.PB) {
 			for pb.Next() {
-				_, err := NewQuery(
+				_ = NewQuery(
 					Bool(
 						Must(
 							Match("title", "elasticsearch"),
@@ -543,9 +510,6 @@ func BenchmarkConcurrentUsage(b *testing.B) {
 						),
 					),
 				)
-				if err != nil {
-					b.Errorf("ESB Concurrent test failed: %v", err)
-				}
 			}
 		})
 	})

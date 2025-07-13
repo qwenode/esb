@@ -45,19 +45,14 @@ func (b *OptimizedNumberRangeBuilder) Lt(value float64) *OptimizedNumberRangeBui
 
 // Build 构建查询选项，使用后会自动回收到对象池
 func (b *OptimizedNumberRangeBuilder) Build() QueryOption {
-	// 创建闭包前先复制必要的数据
 	field := b.field
 	query := b.query
-	
-	// 回收对象到池中
 	numberRangeBuilderPool.Put(b)
-	
-	return func(q *types.Query) error {
+	return func(q *types.Query) {
 		if q.Range == nil {
 			q.Range = make(map[string]types.RangeQuery)
 		}
 		q.Range[field] = query
-		return nil
 	}
 }
 
@@ -88,9 +83,8 @@ var commonQueryTemplates = map[string]*types.Query{
 func FastTerm(field, value string) QueryOption {
 	templateKey := "term_" + field + "_" + value
 	if template, exists := commonQueryTemplates[templateKey]; exists {
-		return func(q *types.Query) error {
+		return func(q *types.Query) {
 			*q = *template // 直接复制预编译的查询
-			return nil
 		}
 	}
 	return Term(field, value) // 回退到标准实现
@@ -100,9 +94,8 @@ func FastTerm(field, value string) QueryOption {
 func FastExists(field string) QueryOption {
 	templateKey := "exists_" + field
 	if template, exists := commonQueryTemplates[templateKey]; exists {
-		return func(q *types.Query) error {
+		return func(q *types.Query) {
 			*q = *template
-			return nil
 		}
 	}
 	return Exists(field)
@@ -134,9 +127,7 @@ func (b *BatchQueryBuilder) Add(option QueryOption) *BatchQueryBuilder {
 func (b *BatchQueryBuilder) Build() (*types.Query, error) {
 	q := &types.Query{}
 	for _, opt := range b.options {
-		if err := opt(q); err != nil {
-			return nil, err
-		}
+		opt(q)
 	}
 	return q, nil
 }
@@ -224,13 +215,13 @@ func (pm *PerformanceMonitor) GetAverageExecutionTime(queryType string) float64 
 // ExampleOptimizedUsage 展示如何使用优化后的 API
 func ExampleOptimizedUsage() {
 	// 使用对象池优化的范围查询
-	query1, _ := NewQuery(
+	query1 := NewQuery(
 		OptimizedNumberRange("age").Gte(18.0).Lt(65.0).Build(),
 	)
 	_ = query1
 
 	// 使用预编译模板的快速查询
-	query2, _ := NewQuery(
+	query2 := NewQuery(
 		FastTerm("status", "published"),
 		FastExists("author"),
 	)

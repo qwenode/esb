@@ -93,10 +93,7 @@ func TestNumberRangeBuilder_BasicUsage(t *testing.T) {
 			builder := tt.builder()
 			queryOption := builder.Build()
 			
-			err := queryOption(query)
-			if err != nil {
-				t.Fatalf("Build() error = %v", err)
-			}
+			queryOption(query)
 			
 			tt.validate(t, query)
 		})
@@ -108,10 +105,7 @@ func TestNumberRangeBuilder_ChainedConditions(t *testing.T) {
 	query := &types.Query{}
 	queryOption := builder.Build()
 	
-	err := queryOption(query)
-	if err != nil {
-		t.Fatalf("Build() error = %v", err)
-	}
+	queryOption(query)
 	
 	if query.Range == nil {
 		t.Fatal("Range query is nil")
@@ -134,10 +128,7 @@ func TestNumberRangeBuilder_FromToConditions(t *testing.T) {
 	query := &types.Query{}
 	queryOption := builder.Build()
 	
-	err := queryOption(query)
-	if err != nil {
-		t.Fatalf("Build() error = %v", err)
-	}
+	queryOption(query)
 	
 	rangeQuery := query.Range["price"]
 	numberQuery := rangeQuery.(types.NumberRangeQuery)
@@ -160,10 +151,7 @@ func TestNumberRangeBuilder_WithOptions(t *testing.T) {
 	query := &types.Query{}
 	queryOption := builder.Build()
 	
-	err := queryOption(query)
-	if err != nil {
-		t.Fatalf("Build() error = %v", err)
-	}
+	queryOption(query)
 	
 	rangeQuery := query.Range["score"]
 	numberQuery := rangeQuery.(types.NumberRangeQuery)
@@ -228,10 +216,7 @@ func TestDateRangeBuilder_BasicUsage(t *testing.T) {
 			builder := tt.builder()
 			queryOption := builder.Build()
 			
-			err := queryOption(query)
-			if err != nil {
-				t.Fatalf("Build() error = %v", err)
-			}
+			queryOption(query)
 			
 			tt.validate(t, query)
 		})
@@ -246,10 +231,7 @@ func TestDateRangeBuilder_WithFormatAndTimeZone(t *testing.T) {
 	query := &types.Query{}
 	queryOption := builder.Build()
 	
-	err := queryOption(query)
-	if err != nil {
-		t.Fatalf("Build() error = %v", err)
-	}
+	queryOption(query)
 	
 	rangeQuery := query.Range["created_at"]
 	dateQuery := rangeQuery.(types.DateRangeQuery)
@@ -268,10 +250,7 @@ func TestDateRangeBuilder_ChainedConditions(t *testing.T) {
 	query := &types.Query{}
 	queryOption := builder.Build()
 	
-	err := queryOption(query)
-	if err != nil {
-		t.Fatalf("Build() error = %v", err)
-	}
+	queryOption(query)
 	
 	rangeQuery := query.Range["created_at"]
 	dateQuery := rangeQuery.(types.DateRangeQuery)
@@ -332,10 +311,7 @@ func TestTermRangeBuilder_BasicUsage(t *testing.T) {
 			builder := tt.builder()
 			queryOption := builder.Build()
 			
-			err := queryOption(query)
-			if err != nil {
-				t.Fatalf("Build() error = %v", err)
-			}
+			queryOption(query)
 			
 			tt.validate(t, query)
 		})
@@ -347,10 +323,7 @@ func TestTermRangeBuilder_ChainedConditions(t *testing.T) {
 	query := &types.Query{}
 	queryOption := builder.Build()
 	
-	err := queryOption(query)
-	if err != nil {
-		t.Fatalf("Build() error = %v", err)
-	}
+	queryOption(query)
 	
 	rangeQuery := query.Range["username"]
 	termQuery := rangeQuery.(types.TermRangeQuery)
@@ -369,10 +342,7 @@ func TestTermRangeBuilder_FromToConditions(t *testing.T) {
 	query := &types.Query{}
 	queryOption := builder.Build()
 	
-	err := queryOption(query)
-	if err != nil {
-		t.Fatalf("Build() error = %v", err)
-	}
+	queryOption(query)
 	
 	rangeQuery := query.Range["category"]
 	termQuery := rangeQuery.(types.TermRangeQuery)
@@ -402,10 +372,7 @@ func TestRangeBuilder_WithBoolQuery(t *testing.T) {
 	query := &types.Query{}
 	queryOption := boolQuery
 	
-	err := queryOption(query)
-	if err != nil {
-		t.Fatalf("Build() error = %v", err)
-	}
+	queryOption(query)
 	
 	if query.Bool == nil {
 		t.Fatal("Bool query is nil")

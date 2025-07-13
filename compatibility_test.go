@@ -9,15 +9,11 @@ import (
 func TestElasticsearchCompatibility(t *testing.T) {
 	t.Run("should generate compatible types.Query", func(t *testing.T) {
 		// Test that our generated Query is compatible with types.Query
-		option := func(q *types.Query) error {
+		option := func(q *types.Query) {
 			// This would be a real query option in practice
-			return nil
 		}
 		
-		query, err := NewQuery(option)
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
+		query := NewQuery(option)
 		
 		// Verify the type is exactly *types.Query
 		if reflect.TypeOf(query) != reflect.TypeOf(&types.Query{}) {
@@ -32,14 +28,11 @@ func TestElasticsearchCompatibility(t *testing.T) {
 	
 	t.Run("should work with elasticsearch client interface", func(t *testing.T) {
 		// Test that our Query can be used where types.Query is expected
-		option := func(q *types.Query) error {
-			return nil
+		option := func(q *types.Query) {
+			return
 		}
 		
-		query, err := NewQuery(option)
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
+		query := NewQuery(option)
 		
 		// This function simulates what the elasticsearch client would do
 		acceptsQuery := func(q *types.Query) bool {
@@ -53,14 +46,11 @@ func TestElasticsearchCompatibility(t *testing.T) {
 	
 	t.Run("should maintain Query struct integrity", func(t *testing.T) {
 		// Create a query and verify all fields are properly initialized
-		option := func(q *types.Query) error {
-			return nil
+		option := func(q *types.Query) {
+			return
 		}
 		
-		query, err := NewQuery(option)
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
+		query := NewQuery(option)
 		
 		// Verify the Query struct is properly initialized
 		queryValue := reflect.ValueOf(query).Elem()

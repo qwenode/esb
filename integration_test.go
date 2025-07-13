@@ -252,7 +252,7 @@ func TestJSONSerializationIntegration(t *testing.T) {
 // TestErrorHandlingIntegration tests error handling in complex scenarios
 func TestErrorHandlingIntegration(t *testing.T) {
 	// Test error propagation in nested queries
-	_, err := NewQuery(
+	_ = NewQuery(
 		Bool(
 			Must(
 				Match("", "value"), // Empty field should cause error
@@ -261,12 +261,8 @@ func TestErrorHandlingIntegration(t *testing.T) {
 		),
 	)
 	
-	if err != nil {
-		t.Errorf("Unexpected error for empty field in nested query: %v", err)
-	}
-	
 	// Test deeply nested queries - should work now
-	_, err = NewQuery(
+	_ = NewQuery(
 		Bool(
 			Must(
 				Bool(
@@ -279,29 +275,21 @@ func TestErrorHandlingIntegration(t *testing.T) {
 		),
 	)
 	
-	if err != nil {
-		t.Errorf("Unexpected error for empty value in deeply nested query: %v", err)
-	}
-	
 	// Test Range query - should work now
-	_, err = NewQuery(
+	_ = NewQuery(
 		Bool(
 			Must(
 				NumberRange("").Gte(10.0).Build(), // Empty field should work now
 			),
 		),
 	)
-	
-	if err != nil {
-		t.Errorf("Unexpected error for empty field in Range query: %v", err)
-	}
 }
 
 // TestPerformanceIntegration tests performance with complex queries
 func TestPerformanceIntegration(t *testing.T) {
 	// Create a complex query multiple times to test performance
 	for i := 0; i < 1000; i++ {
-		_, err := NewQuery(
+		_ = NewQuery(
 			Bool(
 							Must(
 				Match("title", "elasticsearch"),
@@ -321,10 +309,6 @@ func TestPerformanceIntegration(t *testing.T) {
 			),
 		)
 		
-		if err != nil {
-			t.Errorf("Performance test failed at iteration %d: %v", i, err)
-			return
-		}
 	}
 }
 

@@ -10,19 +10,13 @@ import (
 func BenchmarkOptimizedVsOriginal(b *testing.B) {
 	b.Run("Original_NumberRange", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			_, err := NewQuery(NumberRange("age").Gte(18.0).Lt(65.0).Build())
-			if err != nil {
-				b.Errorf("Original NumberRange failed: %v", err)
-			}
+			_ = NewQuery(NumberRange("age").Gte(18.0).Lt(65.0).Build())
 		}
 	})
 
 	b.Run("Optimized_NumberRange", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			_, err := NewQuery(OptimizedNumberRange("age").Gte(18.0).Lt(65.0).Build())
-			if err != nil {
-				b.Errorf("Optimized NumberRange failed: %v", err)
-			}
+			_ = NewQuery(OptimizedNumberRange("age").Gte(18.0).Lt(65.0).Build())
 		}
 	})
 
@@ -47,28 +41,19 @@ func BenchmarkOptimizedVsOriginal(b *testing.B) {
 func BenchmarkFastTermVsOriginal(b *testing.B) {
 	b.Run("Original_Term", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			_, err := NewQuery(Term("status", "published"))
-			if err != nil {
-				b.Errorf("Original Term failed: %v", err)
-			}
+			_ = NewQuery(Term("status", "published"))
 		}
 	})
 
 	b.Run("Fast_Term_Cached", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			_, err := NewQuery(FastTerm("status", "published"))
-			if err != nil {
-				b.Errorf("Fast Term failed: %v", err)
-			}
+			_ = NewQuery(FastTerm("status", "published"))
 		}
 	})
 
 	b.Run("Fast_Term_NotCached", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			_, err := NewQuery(FastTerm("category", "tech"))
-			if err != nil {
-				b.Errorf("Fast Term failed: %v", err)
-			}
+			_ = NewQuery(FastTerm("category", "tech"))
 		}
 	})
 
@@ -88,28 +73,23 @@ func BenchmarkFastTermVsOriginal(b *testing.B) {
 func BenchmarkBatchQueryBuilder(b *testing.B) {
 	b.Run("Individual_Queries", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			_, err := NewQuery(
+			_ = NewQuery(
 				Term("status", "published"),
 				Match("title", "elasticsearch"),
 				NumberRange("age").Gte(18.0).Build(),
 			)
-			if err != nil {
-				b.Errorf("Individual queries failed: %v", err)
-			}
 		}
 	})
 
 	b.Run("Batch_Query_Builder", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			builder := NewBatchQueryBuilder()
-			_, err := builder.
+			query, _ := builder.
 				Add(Term("status", "published")).
 				Add(Match("title", "elasticsearch")).
 				Add(NumberRange("age").Gte(18.0).Build()).
 				Build()
-			if err != nil {
-				b.Errorf("Batch query builder failed: %v", err)
-			}
+			_ = query
 		}
 	})
 }
@@ -118,10 +98,7 @@ func BenchmarkBatchQueryBuilder(b *testing.B) {
 func BenchmarkGeneratedQueries(b *testing.B) {
 	b.Run("ESB_Term", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			_, err := NewQuery(Term("status", "published"))
-			if err != nil {
-				b.Errorf("ESB Term failed: %v", err)
-			}
+			_ = NewQuery(Term("status", "published"))
 		}
 	})
 
@@ -155,7 +132,7 @@ func BenchmarkGeneratedQueries(b *testing.B) {
 func BenchmarkComplexOptimizedQuery(b *testing.B) {
 	b.Run("Original_Complex", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			_, err := NewQuery(
+			_ = NewQuery(
 				Bool(
 					Must(
 						Match("title", "elasticsearch"),
@@ -168,15 +145,12 @@ func BenchmarkComplexOptimizedQuery(b *testing.B) {
 					),
 				),
 			)
-			if err != nil {
-				b.Errorf("Original complex query failed: %v", err)
-			}
 		}
 	})
 
 	b.Run("Optimized_Complex", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			_, err := NewQuery(
+			_ = NewQuery(
 				Bool(
 					Must(
 						Match("title", "elasticsearch"),
@@ -189,9 +163,6 @@ func BenchmarkComplexOptimizedQuery(b *testing.B) {
 					),
 				),
 			)
-			if err != nil {
-				b.Errorf("Optimized complex query failed: %v", err)
-			}
 		}
 	})
 }
@@ -201,7 +172,7 @@ func BenchmarkMemoryAllocationOptimized(b *testing.B) {
 	b.Run("Original_Memory", func(b *testing.B) {
 		b.ReportAllocs()
 		for i := 0; i < b.N; i++ {
-			_, err := NewQuery(
+			_ = NewQuery(
 				Bool(
 					Must(
 						Term("status", "published"),
@@ -209,16 +180,13 @@ func BenchmarkMemoryAllocationOptimized(b *testing.B) {
 					),
 				),
 			)
-			if err != nil {
-				b.Errorf("Original memory test failed: %v", err)
-			}
 		}
 	})
 
 	b.Run("Optimized_Memory", func(b *testing.B) {
 		b.ReportAllocs()
 		for i := 0; i < b.N; i++ {
-			_, err := NewQuery(
+			_ = NewQuery(
 				Bool(
 					Must(
 						FastTerm("status", "published"),
@@ -226,9 +194,6 @@ func BenchmarkMemoryAllocationOptimized(b *testing.B) {
 					),
 				),
 			)
-			if err != nil {
-				b.Errorf("Optimized memory test failed: %v", err)
-			}
 		}
 	})
 } 

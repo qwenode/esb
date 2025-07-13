@@ -290,7 +290,7 @@ func TestMatchCompatibility(t *testing.T) {
 func BenchmarkMatchQuery(b *testing.B) {
 	b.Run("Simple Match", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			_, _ = NewQuery(Match("title", "elasticsearch search"))
+			_ = NewQuery(Match("title", "elasticsearch search"))
 		}
 	})
 
@@ -298,7 +298,7 @@ func BenchmarkMatchQuery(b *testing.B) {
 		op := operator.And
 		fuzziness := types.Fuzziness("AUTO")
 		for i := 0; i < b.N; i++ {
-			_, _ = NewQuery(
+			_ = NewQuery(
 				MatchWithOptions("title", "elasticsearch search", MatchOptions{
 					Operator:  &op,
 					Fuzziness: fuzziness,
@@ -309,19 +309,19 @@ func BenchmarkMatchQuery(b *testing.B) {
 
 	b.Run("Match Phrase", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			_, _ = NewQuery(MatchPhrase("content", "elasticsearch is awesome"))
+			_ = NewQuery(MatchPhrase("content", "elasticsearch is awesome"))
 		}
 	})
 
 	b.Run("Match Phrase Prefix", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			_, _ = NewQuery(MatchPhrasePrefix("title", "elasticsearch sea"))
+			_ = NewQuery(MatchPhrasePrefix("title", "elasticsearch sea"))
 		}
 	})
 
 	b.Run("Complex Match in Bool", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			_, _ = NewQuery(
+			_ = NewQuery(
 				Bool(
 					Must(
 						Match("title", "elasticsearch"),

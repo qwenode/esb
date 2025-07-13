@@ -315,7 +315,7 @@ func TestBoolQueryCompatibility(t *testing.T) {
 func BenchmarkBoolQuery(b *testing.B) {
 	b.Run("Simple Bool with Must", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			_, _ = NewQuery(
+			_ = NewQuery(
 				Bool(
 					Must(
 						Term("status", "published"),
@@ -327,7 +327,7 @@ func BenchmarkBoolQuery(b *testing.B) {
 
 	b.Run("Complex Bool with all clauses", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			_, _ = NewQuery(
+			_ = NewQuery(
 				Bool(
 					Must(
 						Term("status", "published"),
@@ -350,7 +350,7 @@ func BenchmarkBoolQuery(b *testing.B) {
 
 	b.Run("Nested Bool queries", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			_, _ = NewQuery(
+			_ = NewQuery(
 				Bool(
 					Must(
 						Term("status", "published"),

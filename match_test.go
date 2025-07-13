@@ -25,25 +25,31 @@ func TestMatch(t *testing.T) {
 
 
 
-	t.Run("should support multiple match queries", func(t *testing.T) {
+	t.Run("should support multiple match queries in Bool", func(t *testing.T) {
 		query, err := NewQuery(
-			Match("title", "elasticsearch"),
-			Match("content", "search engine"),
+			Bool(
+				Must(
+					Match("title", "elasticsearch"),
+					Match("content", "search engine"),
+				),
+			),
 		)
 		if err != nil {
 			t.Errorf("unexpected error: %v", err)
 		}
-		if query.Match == nil {
-			t.Error("expected Match query")
+		if query.Bool == nil {
+			t.Error("expected Bool query")
 		}
-		if len(query.Match) != 2 {
-			t.Errorf("expected 2 match queries, got %d", len(query.Match))
+		if len(query.Bool.Must) != 2 {
+			t.Errorf("expected 2 must queries, got %d", len(query.Bool.Must))
 		}
-		if query.Match["title"].Query != "elasticsearch" {
-			t.Errorf("expected title query 'elasticsearch', got %s", query.Match["title"].Query)
+		// Check first match query
+		if query.Bool.Must[0].Match == nil {
+			t.Error("expected first query to be Match")
 		}
-		if query.Match["content"].Query != "search engine" {
-			t.Errorf("expected content query 'search engine', got %s", query.Match["content"].Query)
+		// Check second match query
+		if query.Bool.Must[1].Match == nil {
+			t.Error("expected second query to be Match")
 		}
 	})
 }

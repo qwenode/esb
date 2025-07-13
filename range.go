@@ -79,43 +79,37 @@ func TermRange(field string) *TermRangeBuilder {
 
 // Gte sets the "greater than or equal to" condition for numeric values.
 func (b *NumberRangeBuilder) Gte(value float64) *NumberRangeBuilder {
-	floatVal := types.Float64(value)
-	b.query.Gte = &floatVal
+	b.query.Gte = (*types.Float64)(&value)
 	return b
 }
 
 // Gt sets the "greater than" condition for numeric values.
 func (b *NumberRangeBuilder) Gt(value float64) *NumberRangeBuilder {
-	floatVal := types.Float64(value)
-	b.query.Gt = &floatVal
+	b.query.Gt = (*types.Float64)(&value)
 	return b
 }
 
 // Lte sets the "less than or equal to" condition for numeric values.
 func (b *NumberRangeBuilder) Lte(value float64) *NumberRangeBuilder {
-	floatVal := types.Float64(value)
-	b.query.Lte = &floatVal
+	b.query.Lte = (*types.Float64)(&value)
 	return b
 }
 
 // Lt sets the "less than" condition for numeric values.
 func (b *NumberRangeBuilder) Lt(value float64) *NumberRangeBuilder {
-	floatVal := types.Float64(value)
-	b.query.Lt = &floatVal
+	b.query.Lt = (*types.Float64)(&value)
 	return b
 }
 
 // From sets the "from" condition (inclusive) for numeric values.
 func (b *NumberRangeBuilder) From(value float64) *NumberRangeBuilder {
-	floatVal := types.Float64(value)
-	b.query.From = &floatVal
+	b.query.From = (*types.Float64)(&value)
 	return b
 }
 
 // To sets the "to" condition (exclusive) for numeric values.
 func (b *NumberRangeBuilder) To(value float64) *NumberRangeBuilder {
-	floatVal := types.Float64(value)
-	b.query.To = &floatVal
+	b.query.To = (*types.Float64)(&value)
 	return b
 }
 
@@ -140,10 +134,9 @@ func (b *NumberRangeBuilder) Relation(relation *rangerelation.RangeRelation) *Nu
 // Build creates the QueryOption from the configured numeric range builder.
 func (b *NumberRangeBuilder) Build() QueryOption {
 	return func(q *types.Query) error {
-		if q.Range == nil {
-			q.Range = make(map[string]types.RangeQuery)
+		q.Range = map[string]types.RangeQuery{
+			b.field: b.query,
 		}
-		q.Range[b.field] = b.query
 		return nil
 	}
 }
@@ -221,10 +214,9 @@ func (b *DateRangeBuilder) Relation(relation *rangerelation.RangeRelation) *Date
 // Build creates the QueryOption from the configured date range builder.
 func (b *DateRangeBuilder) Build() QueryOption {
 	return func(q *types.Query) error {
-		if q.Range == nil {
-			q.Range = make(map[string]types.RangeQuery)
+		q.Range = map[string]types.RangeQuery{
+			b.field: b.query,
 		}
-		q.Range[b.field] = b.query
 		return nil
 	}
 }
@@ -290,10 +282,9 @@ func (b *TermRangeBuilder) Relation(relation *rangerelation.RangeRelation) *Term
 // Build creates the QueryOption from the configured term range builder.
 func (b *TermRangeBuilder) Build() QueryOption {
 	return func(q *types.Query) error {
-		if q.Range == nil {
-			q.Range = make(map[string]types.RangeQuery)
+		q.Range = map[string]types.RangeQuery{
+			b.field: b.query,
 		}
-		q.Range[b.field] = b.query
 		return nil
 	}
 } 

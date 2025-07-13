@@ -31,17 +31,9 @@ var (
 //   
 //   client.Search().Index("articles").Query(query)
 func NewQuery(opts ...QueryOption) (*types.Query, error) {
-	if len(opts) == 0 {
-		return nil, ErrNoOptions
-	}
-
 	query := &types.Query{}
 	
 	for _, opt := range opts {
-		if opt == nil {
-			continue // Skip nil options
-		}
-		
 		if err := opt(query); err != nil {
 			return nil, err
 		}

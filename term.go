@@ -11,12 +11,10 @@ import (
 //   esb.Term("status", "published")
 func Term(field, value string) QueryOption {
 	return func(q *types.Query) error {
-		if q.Term == nil {
-			q.Term = make(map[string]types.TermQuery)
-		}
-		
-		q.Term[field] = types.TermQuery{
-			Value: value,
+		q.Term = map[string]types.TermQuery{
+			field: {
+				Value: value,
+			},
 		}
 		
 		return nil

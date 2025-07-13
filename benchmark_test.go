@@ -360,10 +360,12 @@ func BenchmarkNestedBoolQuery(b *testing.B) {
 func BenchmarkMatchWithOptions(b *testing.B) {
 	b.Run("ESB_MatchWithOptions", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
+			boost := float32(2.0)
+			analyzer := "standard"
 			_, err := NewQuery(
 				MatchWithOptions("title", "elasticsearch guide", MatchOptions{
-					Boost:    float32Ptr(2.0),
-					Analyzer: stringPtr("standard"),
+					Boost:    &boost,
+					Analyzer: &analyzer,
 					Operator: &operator.And,
 				}),
 			)

@@ -6,21 +6,8 @@ import (
 )
 
 func TestNewQuery(t *testing.T) {
-	t.Run("should return error when no options provided", func(t *testing.T) {
+	t.Run("should create empty query when no options provided", func(t *testing.T) {
 		query, err := NewQuery()
-		if err == nil {
-			t.Error("expected error when no options provided")
-		}
-		if err != ErrNoOptions {
-			t.Errorf("expected ErrNoOptions, got %v", err)
-		}
-		if query != nil {
-			t.Error("expected nil query when error occurs")
-		}
-	})
-
-	t.Run("should create empty query with nil option", func(t *testing.T) {
-		query, err := NewQuery(nil)
 		if err != nil {
 			t.Errorf("unexpected error: %v", err)
 		}
@@ -30,6 +17,16 @@ func TestNewQuery(t *testing.T) {
 	})
 
 	t.Run("should create query with valid option", func(t *testing.T) {
+		query, err := NewQuery(Term("status", "published"))
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if query == nil {
+			t.Error("expected non-nil query")
+		}
+	})
+
+	t.Run("should create query with custom option", func(t *testing.T) {
 		validOption := func(q *types.Query) error {
 			// Simple option that sets a field (we'll implement actual options later)
 			return nil

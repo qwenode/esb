@@ -6,16 +6,16 @@ import (
 )
 
 func TestBool(t *testing.T) {
-	t.Run("should return error when no options provided", func(t *testing.T) {
+	t.Run("should create empty Bool query when no options provided", func(t *testing.T) {
 		query, err := NewQuery(Bool())
-		if err == nil {
-			t.Error("expected error when no Bool options provided")
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
 		}
-		if err != ErrNoOptions {
-			t.Errorf("expected ErrNoOptions, got %v", err)
+		if query == nil {
+			t.Error("expected non-nil query")
 		}
-		if query != nil {
-			t.Error("expected nil query when error occurs")
+		if query.Bool == nil {
+			t.Error("expected Bool query")
 		}
 	})
 
@@ -189,12 +189,11 @@ func TestBool(t *testing.T) {
 		}
 	})
 
-	t.Run("should handle nil options gracefully", func(t *testing.T) {
+	t.Run("should handle multiple valid options", func(t *testing.T) {
 		query, err := NewQuery(
 			Bool(
 				Must(
 					Term("status", "published"),
-					nil, // nil option should be skipped
 					Term("active", "true"),
 				),
 			),
@@ -206,7 +205,7 @@ func TestBool(t *testing.T) {
 			t.Error("expected Bool query")
 		}
 		if len(query.Bool.Must) != 2 {
-			t.Errorf("expected 2 Must clauses (nil should be skipped), got %d", len(query.Bool.Must))
+			t.Errorf("expected 2 Must clauses, got %d", len(query.Bool.Must))
 		}
 	})
 

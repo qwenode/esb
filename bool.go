@@ -29,17 +29,9 @@ type BoolOption func(*types.BoolQuery) error
 //   )
 func Bool(opts ...BoolOption) QueryOption {
 	return func(q *types.Query) error {
-		if len(opts) == 0 {
-			return ErrNoOptions
-		}
-
 		boolQuery := &types.BoolQuery{}
 		
 		for _, opt := range opts {
-			if opt == nil {
-				continue // Skip nil options
-			}
-			
 			if err := opt(boolQuery); err != nil {
 				return err
 			}
@@ -60,15 +52,7 @@ func Bool(opts ...BoolOption) QueryOption {
 //   )
 func Must(opts ...QueryOption) BoolOption {
 	return func(bq *types.BoolQuery) error {
-		if len(opts) == 0 {
-			return nil // Empty Must clause is valid
-		}
-		
 		for _, opt := range opts {
-			if opt == nil {
-				continue // Skip nil options
-			}
-			
 			subQuery := &types.Query{}
 			if err := opt(subQuery); err != nil {
 				return err
@@ -92,15 +76,7 @@ func Must(opts ...QueryOption) BoolOption {
 //   )
 func Should(opts ...QueryOption) BoolOption {
 	return func(bq *types.BoolQuery) error {
-		if len(opts) == 0 {
-			return nil // Empty Should clause is valid
-		}
-		
 		for _, opt := range opts {
-			if opt == nil {
-				continue // Skip nil options
-			}
-			
 			subQuery := &types.Query{}
 			if err := opt(subQuery); err != nil {
 				return err
@@ -124,15 +100,7 @@ func Should(opts ...QueryOption) BoolOption {
 //   )
 func Filter(opts ...QueryOption) BoolOption {
 	return func(bq *types.BoolQuery) error {
-		if len(opts) == 0 {
-			return nil // Empty Filter clause is valid
-		}
-		
 		for _, opt := range opts {
-			if opt == nil {
-				continue // Skip nil options
-			}
-			
 			subQuery := &types.Query{}
 			if err := opt(subQuery); err != nil {
 				return err
@@ -155,15 +123,7 @@ func Filter(opts ...QueryOption) BoolOption {
 //   )
 func MustNot(opts ...QueryOption) BoolOption {
 	return func(bq *types.BoolQuery) error {
-		if len(opts) == 0 {
-			return nil // Empty MustNot clause is valid
-		}
-		
 		for _, opt := range opts {
-			if opt == nil {
-				continue // Skip nil options
-			}
-			
 			subQuery := &types.Query{}
 			if err := opt(subQuery); err != nil {
 				return err

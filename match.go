@@ -13,12 +13,10 @@ import (
 //   esb.Match("title", "elasticsearch search")
 func Match(field, query string) QueryOption {
     return func(q *types.Query) error {
-        if q.Match == nil {
-            q.Match = make(map[string]types.MatchQuery)
-        }
-        
-        q.Match[field] = types.MatchQuery{
-            Query: query,
+        q.Match = map[string]types.MatchQuery{
+            field: {
+                Query: query,
+            },
         }
         
         return nil
@@ -53,10 +51,6 @@ type MatchOptions struct {
 //   })
 func MatchWithOptions(field, query string, options MatchOptions) QueryOption {
     return func(q *types.Query) error {
-        if q.Match == nil {
-            q.Match = make(map[string]types.MatchQuery)
-        }
-        
         matchQuery := types.MatchQuery{
             Query: query,
         }
@@ -102,7 +96,9 @@ func MatchWithOptions(field, query string, options MatchOptions) QueryOption {
             matchQuery.ZeroTermsQuery = options.ZeroTermsQuery
         }
         
-        q.Match[field] = matchQuery
+        q.Match = map[string]types.MatchQuery{
+            field: matchQuery,
+        }
         
         return nil
     }
@@ -115,12 +111,10 @@ func MatchWithOptions(field, query string, options MatchOptions) QueryOption {
 //   esb.MatchPhrase("content", "elasticsearch is awesome")
 func MatchPhrase(field, phrase string) QueryOption {
     return func(q *types.Query) error {
-        if q.MatchPhrase == nil {
-            q.MatchPhrase = make(map[string]types.MatchPhraseQuery)
-        }
-        
-        q.MatchPhrase[field] = types.MatchPhraseQuery{
-            Query: phrase,
+        q.MatchPhrase = map[string]types.MatchPhraseQuery{
+            field: {
+                Query: phrase,
+            },
         }
         
         return nil
@@ -138,15 +132,11 @@ type MatchPhraseOptions struct {
 //
 // Example:
 //   esb.MatchPhraseWithOptions("content", "elasticsearch search", esb.MatchPhraseOptions{
-//       Slop: intPtr(2),
-//       Analyzer: stringPtr("standard"),
+//       Slop: &[]int{2}[0],
+//       Analyzer: &[]string{"standard"}[0],
 //   })
 func MatchPhraseWithOptions(field, phrase string, options MatchPhraseOptions) QueryOption {
     return func(q *types.Query) error {
-        if q.MatchPhrase == nil {
-            q.MatchPhrase = make(map[string]types.MatchPhraseQuery)
-        }
-        
         matchPhraseQuery := types.MatchPhraseQuery{
             Query: phrase,
         }
@@ -162,7 +152,9 @@ func MatchPhraseWithOptions(field, phrase string, options MatchPhraseOptions) Qu
             matchPhraseQuery.Boost = options.Boost
         }
         
-        q.MatchPhrase[field] = matchPhraseQuery
+        q.MatchPhrase = map[string]types.MatchPhraseQuery{
+            field: matchPhraseQuery,
+        }
         
         return nil
     }
@@ -175,31 +167,12 @@ func MatchPhraseWithOptions(field, phrase string, options MatchPhraseOptions) Qu
 //   esb.MatchPhrasePrefix("title", "elasticsearch sea")
 func MatchPhrasePrefix(field, prefix string) QueryOption {
     return func(q *types.Query) error {
-        if q.MatchPhrasePrefix == nil {
-            q.MatchPhrasePrefix = make(map[string]types.MatchPhrasePrefixQuery)
-        }
-        
-        q.MatchPhrasePrefix[field] = types.MatchPhrasePrefixQuery{
-            Query: prefix,
+        q.MatchPhrasePrefix = map[string]types.MatchPhrasePrefixQuery{
+            field: {
+                Query: prefix,
+            },
         }
        
         return nil
     }
-}
-
-// Helper functions for creating pointers to basic types
-func intPtr(i int) *int {
-    return &i
-}
-
-func stringPtr(s string) *string {
-    return &s
-}
-
-func float32Ptr(f float32) *float32 {
-    return &f
-}
-
-func boolPtr(b bool) *bool {
-    return &b
 }

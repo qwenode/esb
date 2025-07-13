@@ -141,7 +141,7 @@ func TestAllQueryTypesIntegration(t *testing.T) {
 				MatchPhrase("content", "getting started"),
 				// Match phrase with options
 				MatchPhraseWithOptions("summary", "quick start", MatchPhraseOptions{
-					Slop: intPtr(2),
+					Slop: &[]int{2}[0],
 				}),
 				// Match phrase prefix
 				MatchPhrasePrefix("tags", "elastic"),
@@ -410,13 +410,13 @@ func TestMatchOptionsIntegration(t *testing.T) {
 			Must(
 				MatchWithOptions("title", "elasticsearch guide", MatchOptions{
 					Fuzziness: "AUTO",
-					Analyzer:  stringPtr("standard"),
-					Boost:     float32Ptr(1.5),
+					Analyzer:  &[]string{"standard"}[0],
+					Boost:     &[]float32{1.5}[0],
 				}),
 				MatchPhraseWithOptions("content", "getting started", MatchPhraseOptions{
-					Slop:     intPtr(2),
-					Analyzer: stringPtr("keyword"),
-					Boost:    float32Ptr(2.0),
+					Slop:     &[]int{2}[0],
+					Analyzer: &[]string{"keyword"}[0],
+					Boost:    &[]float32{2.0}[0],
 				}),
 			),
 		),

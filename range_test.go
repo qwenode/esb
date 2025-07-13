@@ -3,80 +3,85 @@ package esb
 import (
 	"testing"
 	"github.com/elastic/go-elasticsearch/v8/typedapi/types"
+	"github.com/elastic/go-elasticsearch/v8/typedapi/types/enums/rangerelation"
 )
 
-func TestRangeBuilder_BasicUsage(t *testing.T) {
+// =============================================================================
+// NumberRangeBuilder Tests
+// =============================================================================
+
+func TestNumberRangeBuilder_BasicUsage(t *testing.T) {
 	tests := []struct {
 		name     string
 		field    string
-		builder  func() *RangeBuilder
+		builder  func() *NumberRangeBuilder
 		validate func(t *testing.T, query *types.Query)
 	}{
 		{
 			name:  "gte condition",
 			field: "age",
-			builder: func() *RangeBuilder {
-				return Range("age").Gte(18)
+			builder: func() *NumberRangeBuilder {
+				return NumberRange("age").Gte(18.0)
 			},
 			validate: func(t *testing.T, query *types.Query) {
 				if query.Range == nil {
 					t.Fatal("Range query is nil")
 				}
 				rangeQuery := query.Range["age"]
-				untypedQuery := rangeQuery.(types.UntypedRangeQuery)
-				if string(untypedQuery.Gte) != "18" {
-					t.Errorf("Gte = %s, want 18", string(untypedQuery.Gte))
+				numberQuery := rangeQuery.(types.NumberRangeQuery)
+				if numberQuery.Gte == nil || float64(*numberQuery.Gte) != 18.0 {
+					t.Errorf("Gte = %v, want 18.0", numberQuery.Gte)
 				}
 			},
 		},
 		{
 			name:  "gt condition",
 			field: "price",
-			builder: func() *RangeBuilder {
-				return Range("price").Gt(10.5)
+			builder: func() *NumberRangeBuilder {
+				return NumberRange("price").Gt(10.5)
 			},
 			validate: func(t *testing.T, query *types.Query) {
 				if query.Range == nil {
 					t.Fatal("Range query is nil")
 				}
 				rangeQuery := query.Range["price"]
-				untypedQuery := rangeQuery.(types.UntypedRangeQuery)
-				if string(untypedQuery.Gt) != "10.5" {
-					t.Errorf("Gt = %s, want 10.5", string(untypedQuery.Gt))
+				numberQuery := rangeQuery.(types.NumberRangeQuery)
+				if numberQuery.Gt == nil || float64(*numberQuery.Gt) != 10.5 {
+					t.Errorf("Gt = %v, want 10.5", numberQuery.Gt)
 				}
 			},
 		},
 		{
 			name:  "lte condition",
 			field: "score",
-			builder: func() *RangeBuilder {
-				return Range("score").Lte(100)
+			builder: func() *NumberRangeBuilder {
+				return NumberRange("score").Lte(100.0)
 			},
 			validate: func(t *testing.T, query *types.Query) {
 				if query.Range == nil {
 					t.Fatal("Range query is nil")
 				}
 				rangeQuery := query.Range["score"]
-				untypedQuery := rangeQuery.(types.UntypedRangeQuery)
-				if string(untypedQuery.Lte) != "100" {
-					t.Errorf("Lte = %s, want 100", string(untypedQuery.Lte))
+				numberQuery := rangeQuery.(types.NumberRangeQuery)
+				if numberQuery.Lte == nil || float64(*numberQuery.Lte) != 100.0 {
+					t.Errorf("Lte = %v, want 100.0", numberQuery.Lte)
 				}
 			},
 		},
 		{
 			name:  "lt condition",
 			field: "temperature",
-			builder: func() *RangeBuilder {
-				return Range("temperature").Lt(25.5)
+			builder: func() *NumberRangeBuilder {
+				return NumberRange("temperature").Lt(25.5)
 			},
 			validate: func(t *testing.T, query *types.Query) {
 				if query.Range == nil {
 					t.Fatal("Range query is nil")
 				}
 				rangeQuery := query.Range["temperature"]
-				untypedQuery := rangeQuery.(types.UntypedRangeQuery)
-				if string(untypedQuery.Lt) != "25.5" {
-					t.Errorf("Lt = %s, want 25.5", string(untypedQuery.Lt))
+				numberQuery := rangeQuery.(types.NumberRangeQuery)
+				if numberQuery.Lt == nil || float64(*numberQuery.Lt) != 25.5 {
+					t.Errorf("Lt = %v, want 25.5", numberQuery.Lt)
 				}
 			},
 		},
@@ -84,230 +89,396 @@ func TestRangeBuilder_BasicUsage(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			query, err := NewQuery(tt.builder().Build())
+			query := &types.Query{}
+			builder := tt.builder()
+			queryOption := builder.Build()
+			
+			err := queryOption(query)
 			if err != nil {
-				t.Errorf("NewQuery() error = %v", err)
-				return
+				t.Fatalf("Build() error = %v", err)
 			}
+			
 			tt.validate(t, query)
 		})
 	}
 }
 
-func TestRangeBuilder_ChainedConditions(t *testing.T) {
-	query, err := NewQuery(
-		Range("age").Gte(18).Lt(65).Build(),
-	)
+func TestNumberRangeBuilder_ChainedConditions(t *testing.T) {
+	builder := NumberRange("age").Gte(18.0).Lt(65.0)
+	query := &types.Query{}
+	queryOption := builder.Build()
+	
+	err := queryOption(query)
 	if err != nil {
-		t.Errorf("NewQuery() error = %v", err)
-		return
+		t.Fatalf("Build() error = %v", err)
 	}
-
+	
 	if query.Range == nil {
 		t.Fatal("Range query is nil")
 	}
-
+	
 	rangeQuery := query.Range["age"]
-	untypedQuery := rangeQuery.(types.UntypedRangeQuery)
+	numberQuery := rangeQuery.(types.NumberRangeQuery)
 	
-	if string(untypedQuery.Gte) != "18" {
-		t.Errorf("Gte = %s, want 18", string(untypedQuery.Gte))
+	if numberQuery.Gte == nil || float64(*numberQuery.Gte) != 18.0 {
+		t.Errorf("Gte = %v, want 18.0", numberQuery.Gte)
 	}
 	
-	if string(untypedQuery.Lt) != "65" {
-		t.Errorf("Lt = %s, want 65", string(untypedQuery.Lt))
+	if numberQuery.Lt == nil || float64(*numberQuery.Lt) != 65.0 {
+		t.Errorf("Lt = %v, want 65.0", numberQuery.Lt)
 	}
 }
 
-func TestRangeBuilder_FromToConditions(t *testing.T) {
-	query, err := NewQuery(
-		Range("price").From(10.0).To(100.0).Build(),
-	)
+func TestNumberRangeBuilder_FromToConditions(t *testing.T) {
+	builder := NumberRange("price").From(10.0).To(100.0)
+	query := &types.Query{}
+	queryOption := builder.Build()
+	
+	err := queryOption(query)
 	if err != nil {
-		t.Errorf("NewQuery() error = %v", err)
-		return
+		t.Fatalf("Build() error = %v", err)
 	}
-
-	if query.Range == nil {
-		t.Fatal("Range query is nil")
-	}
-
+	
 	rangeQuery := query.Range["price"]
-	untypedQuery := rangeQuery.(types.UntypedRangeQuery)
+	numberQuery := rangeQuery.(types.NumberRangeQuery)
 	
-	if untypedQuery.From == nil {
-		t.Fatal("From is nil")
-	}
-	if string(*untypedQuery.From) != "10" {
-		t.Errorf("From = %s, want 10", string(*untypedQuery.From))
+	if numberQuery.From == nil || float64(*numberQuery.From) != 10.0 {
+		t.Errorf("From = %v, want 10.0", numberQuery.From)
 	}
 	
-	if untypedQuery.To == nil {
-		t.Fatal("To is nil")
-	}
-	if string(*untypedQuery.To) != "100" {
-		t.Errorf("To = %s, want 100", string(*untypedQuery.To))
+	if numberQuery.To == nil || float64(*numberQuery.To) != 100.0 {
+		t.Errorf("To = %v, want 100.0", numberQuery.To)
 	}
 }
 
-func TestRangeBuilder_StringValues(t *testing.T) {
-	query, err := NewQuery(
-		Range("timestamp").Gte("2023-01-01").Lte("2023-12-31").Build(),
-	)
+func TestNumberRangeBuilder_WithOptions(t *testing.T) {
+	boost := float32(2.0)
+	queryName := "test_query"
+	relation := rangerelation.Within
+	
+	builder := NumberRange("score").Gte(50.0).Boost(boost).QueryName(queryName).Relation(&relation)
+	query := &types.Query{}
+	queryOption := builder.Build()
+	
+	err := queryOption(query)
 	if err != nil {
-		t.Errorf("NewQuery() error = %v", err)
-		return
-	}
-
-	if query.Range == nil {
-		t.Fatal("Range query is nil")
-	}
-
-	rangeQuery := query.Range["timestamp"]
-	untypedQuery := rangeQuery.(types.UntypedRangeQuery)
-	
-	if string(untypedQuery.Gte) != `"2023-01-01"` {
-		t.Errorf("Gte = %s, want \"2023-01-01\"", string(untypedQuery.Gte))
+		t.Fatalf("Build() error = %v", err)
 	}
 	
-	if string(untypedQuery.Lte) != `"2023-12-31"` {
-		t.Errorf("Lte = %s, want \"2023-12-31\"", string(untypedQuery.Lte))
+	rangeQuery := query.Range["score"]
+	numberQuery := rangeQuery.(types.NumberRangeQuery)
+	
+	if numberQuery.Boost == nil || *numberQuery.Boost != boost {
+		t.Errorf("Boost = %v, want %v", numberQuery.Boost, boost)
+	}
+	
+	if numberQuery.QueryName_ == nil || *numberQuery.QueryName_ != queryName {
+		t.Errorf("QueryName = %v, want %v", numberQuery.QueryName_, queryName)
+	}
+	
+	if numberQuery.Relation == nil || *numberQuery.Relation != relation {
+		t.Errorf("Relation = %v, want %v", numberQuery.Relation, relation)
 	}
 }
 
-func TestRangeBuilder_WithOptions(t *testing.T) {
-	query, err := NewQuery(
-		Range("timestamp").
-			Gte("2023-01-01").
-			Lte("2023-12-31").
-			Format("yyyy-MM-dd").
-			TimeZone("UTC").
-			Boost(1.5).
-			Build(),
-	)
+// =============================================================================
+// DateRangeBuilder Tests
+// =============================================================================
+
+func TestDateRangeBuilder_BasicUsage(t *testing.T) {
+	tests := []struct {
+		name     string
+		field    string
+		builder  func() *DateRangeBuilder
+		validate func(t *testing.T, query *types.Query)
+	}{
+		{
+			name:  "gte condition",
+			field: "created_at",
+			builder: func() *DateRangeBuilder {
+				return DateRange("created_at").Gte("2023-01-01")
+			},
+			validate: func(t *testing.T, query *types.Query) {
+				rangeQuery := query.Range["created_at"]
+				dateQuery := rangeQuery.(types.DateRangeQuery)
+				if dateQuery.Gte == nil || *dateQuery.Gte != "2023-01-01" {
+					t.Errorf("Gte = %v, want 2023-01-01", dateQuery.Gte)
+				}
+			},
+		},
+		{
+			name:  "gt condition",
+			field: "timestamp",
+			builder: func() *DateRangeBuilder {
+				return DateRange("timestamp").Gt("now-1d")
+			},
+			validate: func(t *testing.T, query *types.Query) {
+				rangeQuery := query.Range["timestamp"]
+				dateQuery := rangeQuery.(types.DateRangeQuery)
+				if dateQuery.Gt == nil || *dateQuery.Gt != "now-1d" {
+					t.Errorf("Gt = %v, want now-1d", dateQuery.Gt)
+				}
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			query := &types.Query{}
+			builder := tt.builder()
+			queryOption := builder.Build()
+			
+			err := queryOption(query)
+			if err != nil {
+				t.Fatalf("Build() error = %v", err)
+			}
+			
+			tt.validate(t, query)
+		})
+	}
+}
+
+func TestDateRangeBuilder_WithFormatAndTimeZone(t *testing.T) {
+	format := "yyyy-MM-dd"
+	timeZone := "UTC"
+	
+	builder := DateRange("created_at").Gte("2023-01-01").Format(format).TimeZone(timeZone)
+	query := &types.Query{}
+	queryOption := builder.Build()
+	
+	err := queryOption(query)
 	if err != nil {
-		t.Errorf("NewQuery() error = %v", err)
-		return
-	}
-
-	if query.Range == nil {
-		t.Fatal("Range query is nil")
-	}
-
-	rangeQuery := query.Range["timestamp"]
-	untypedQuery := rangeQuery.(types.UntypedRangeQuery)
-	
-	if untypedQuery.Format == nil || *untypedQuery.Format != "yyyy-MM-dd" {
-		t.Errorf("Format = %v, want yyyy-MM-dd", untypedQuery.Format)
+		t.Fatalf("Build() error = %v", err)
 	}
 	
-	if untypedQuery.TimeZone == nil || *untypedQuery.TimeZone != "UTC" {
-		t.Errorf("TimeZone = %v, want UTC", untypedQuery.TimeZone)
+	rangeQuery := query.Range["created_at"]
+	dateQuery := rangeQuery.(types.DateRangeQuery)
+	
+	if dateQuery.Format == nil || *dateQuery.Format != format {
+		t.Errorf("Format = %v, want %v", dateQuery.Format, format)
 	}
 	
-	if untypedQuery.Boost == nil || *untypedQuery.Boost != 1.5 {
-		t.Errorf("Boost = %v, want 1.5", untypedQuery.Boost)
+	if dateQuery.TimeZone == nil || *dateQuery.TimeZone != timeZone {
+		t.Errorf("TimeZone = %v, want %v", dateQuery.TimeZone, timeZone)
 	}
 }
+
+func TestDateRangeBuilder_ChainedConditions(t *testing.T) {
+	builder := DateRange("created_at").Gte("2023-01-01").Lt("2023-12-31")
+	query := &types.Query{}
+	queryOption := builder.Build()
+	
+	err := queryOption(query)
+	if err != nil {
+		t.Fatalf("Build() error = %v", err)
+	}
+	
+	rangeQuery := query.Range["created_at"]
+	dateQuery := rangeQuery.(types.DateRangeQuery)
+	
+	if dateQuery.Gte == nil || *dateQuery.Gte != "2023-01-01" {
+		t.Errorf("Gte = %v, want 2023-01-01", dateQuery.Gte)
+	}
+	
+	if dateQuery.Lt == nil || *dateQuery.Lt != "2023-12-31" {
+		t.Errorf("Lt = %v, want 2023-12-31", dateQuery.Lt)
+	}
+}
+
+// =============================================================================
+// TermRangeBuilder Tests
+// =============================================================================
+
+func TestTermRangeBuilder_BasicUsage(t *testing.T) {
+	tests := []struct {
+		name     string
+		field    string
+		builder  func() *TermRangeBuilder
+		validate func(t *testing.T, query *types.Query)
+	}{
+		{
+			name:  "gte condition",
+			field: "username",
+			builder: func() *TermRangeBuilder {
+				return TermRange("username").Gte("alice")
+			},
+			validate: func(t *testing.T, query *types.Query) {
+				rangeQuery := query.Range["username"]
+				termQuery := rangeQuery.(types.TermRangeQuery)
+				if termQuery.Gte == nil || *termQuery.Gte != "alice" {
+					t.Errorf("Gte = %v, want alice", termQuery.Gte)
+				}
+			},
+		},
+		{
+			name:  "lt condition",
+			field: "category",
+			builder: func() *TermRangeBuilder {
+				return TermRange("category").Lt("electronics")
+			},
+			validate: func(t *testing.T, query *types.Query) {
+				rangeQuery := query.Range["category"]
+				termQuery := rangeQuery.(types.TermRangeQuery)
+				if termQuery.Lt == nil || *termQuery.Lt != "electronics" {
+					t.Errorf("Lt = %v, want electronics", termQuery.Lt)
+				}
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			query := &types.Query{}
+			builder := tt.builder()
+			queryOption := builder.Build()
+			
+			err := queryOption(query)
+			if err != nil {
+				t.Fatalf("Build() error = %v", err)
+			}
+			
+			tt.validate(t, query)
+		})
+	}
+}
+
+func TestTermRangeBuilder_ChainedConditions(t *testing.T) {
+	builder := TermRange("username").Gte("alice").Lt("bob")
+	query := &types.Query{}
+	queryOption := builder.Build()
+	
+	err := queryOption(query)
+	if err != nil {
+		t.Fatalf("Build() error = %v", err)
+	}
+	
+	rangeQuery := query.Range["username"]
+	termQuery := rangeQuery.(types.TermRangeQuery)
+	
+	if termQuery.Gte == nil || *termQuery.Gte != "alice" {
+		t.Errorf("Gte = %v, want alice", termQuery.Gte)
+	}
+	
+	if termQuery.Lt == nil || *termQuery.Lt != "bob" {
+		t.Errorf("Lt = %v, want bob", termQuery.Lt)
+	}
+}
+
+func TestTermRangeBuilder_FromToConditions(t *testing.T) {
+	builder := TermRange("category").From("electronics").To("home")
+	query := &types.Query{}
+	queryOption := builder.Build()
+	
+	err := queryOption(query)
+	if err != nil {
+		t.Fatalf("Build() error = %v", err)
+	}
+	
+	rangeQuery := query.Range["category"]
+	termQuery := rangeQuery.(types.TermRangeQuery)
+	
+	if termQuery.From == nil || *termQuery.From != "electronics" {
+		t.Errorf("From = %v, want electronics", termQuery.From)
+	}
+	
+	if termQuery.To == nil || *termQuery.To != "home" {
+		t.Errorf("To = %v, want home", termQuery.To)
+	}
+}
+
+// =============================================================================
+// Integration Tests
+// =============================================================================
 
 func TestRangeBuilder_WithBoolQuery(t *testing.T) {
-	query, err := NewQuery(
-		Bool(
-			Must(
-				Range("age").Gte(18).Lt(65).Build(),
-				Range("score").Gte(80).Build(),
-			),
+	boolQuery := Bool(
+		Must(
+			NumberRange("age").Gte(18.0).Lt(65.0).Build(),
+			DateRange("created_at").Gte("2023-01-01").Build(),
+			TermRange("status").Gte("active").Build(),
 		),
 	)
+	
+	query := &types.Query{}
+	queryOption := boolQuery
+	
+	err := queryOption(query)
 	if err != nil {
-		t.Errorf("NewQuery() error = %v", err)
-		return
+		t.Fatalf("Build() error = %v", err)
 	}
-
+	
 	if query.Bool == nil {
 		t.Fatal("Bool query is nil")
 	}
-
-	if len(query.Bool.Must) != 2 {
-		t.Errorf("Bool.Must length = %d, want 2", len(query.Bool.Must))
-	}
-
-	// Check first range query
-	if query.Bool.Must[0].Range == nil {
-		t.Fatal("First Must clause should be Range query")
+	
+	if len(query.Bool.Must) != 3 {
+		t.Errorf("Must conditions count = %d, want 3", len(query.Bool.Must))
 	}
 	
-	ageRange := query.Bool.Must[0].Range["age"]
-	ageQuery := ageRange.(types.UntypedRangeQuery)
-	if string(ageQuery.Gte) != "18" {
-		t.Errorf("Age Gte = %s, want 18", string(ageQuery.Gte))
-	}
-
-	// Check second range query
-	if query.Bool.Must[1].Range == nil {
-		t.Fatal("Second Must clause should be Range query")
+	// Check first condition (NumberRange)
+	firstCondition := query.Bool.Must[0]
+	if firstCondition.Range == nil {
+		t.Fatal("First condition Range is nil")
 	}
 	
-	scoreRange := query.Bool.Must[1].Range["score"]
-	scoreQuery := scoreRange.(types.UntypedRangeQuery)
-	if string(scoreQuery.Gte) != "80" {
-		t.Errorf("Score Gte = %s, want 80", string(scoreQuery.Gte))
+	// Check second condition (DateRange)
+	secondCondition := query.Bool.Must[1]
+	if secondCondition.Range == nil {
+		t.Fatal("Second condition Range is nil")
+	}
+	
+	// Check third condition (TermRange)
+	thirdCondition := query.Bool.Must[2]
+	if thirdCondition.Range == nil {
+		t.Fatal("Third condition Range is nil")
 	}
 }
 
-func TestRangeBuilder_EmptyField(t *testing.T) {
-	_, err := NewQuery(Range("").Gte(18).Build())
-	if err == nil {
-		t.Errorf("Expected error for empty field")
-	}
-	if err != ErrEmptyField {
-		t.Errorf("Expected ErrEmptyField, got %v", err)
-	}
-}
+// =============================================================================
+// Benchmarks
+// =============================================================================
 
-func TestRangeBuilder_WhitespaceField(t *testing.T) {
-	_, err := NewQuery(Range("   ").Gte(18).Build())
-	if err == nil {
-		t.Errorf("Expected error for whitespace field")
-	}
-	if err != ErrEmptyField {
-		t.Errorf("Expected ErrEmptyField, got %v", err)
-	}
-}
-
-// Benchmark tests
-func BenchmarkRangeBuilder_Simple(b *testing.B) {
+func BenchmarkNumberRangeBuilder_Simple(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		_, err := NewQuery(Range("age").Gte(18).Build())
-		if err != nil {
-			b.Errorf("NewQuery() error = %v", err)
-		}
+		query := &types.Query{}
+		queryOption := NumberRange("age").Gte(18.0).Build()
+		queryOption(query)
 	}
 }
 
-func BenchmarkRangeBuilder_Complex(b *testing.B) {
+func BenchmarkDateRangeBuilder_Simple(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		_, err := NewQuery(
-			Range("age").Gte(18).Lt(65).Boost(1.2).Build(),
-		)
-		if err != nil {
-			b.Errorf("NewQuery() error = %v", err)
-		}
+		query := &types.Query{}
+		queryOption := DateRange("created_at").Gte("2023-01-01").Build()
+		queryOption(query)
+	}
+}
+
+func BenchmarkTermRangeBuilder_Simple(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		query := &types.Query{}
+		queryOption := TermRange("username").Gte("alice").Build()
+		queryOption(query)
+	}
+}
+
+func BenchmarkNumberRangeBuilder_Complex(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		query := &types.Query{}
+		queryOption := NumberRange("score").Gte(50.0).Lt(100.0).Boost(2.0).QueryName("test").Build()
+		queryOption(query)
 	}
 }
 
 func BenchmarkRangeBuilder_WithBool(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		_, err := NewQuery(
-			Bool(
-				Must(
-					Range("age").Gte(18).Lt(65).Build(),
-					Range("score").Gte(80).Build(),
-				),
+		query := &types.Query{}
+		queryOption := Bool(
+			Must(
+				NumberRange("age").Gte(18.0).Build(),
+				DateRange("created_at").Gte("2023-01-01").Build(),
 			),
 		)
-		if err != nil {
-			b.Errorf("NewQuery() error = %v", err)
-		}
+		queryOption(query)
 	}
 } 

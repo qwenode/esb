@@ -19,8 +19,7 @@ type QueryOption func(*types.Query) error
 ```go
 var (
     ErrInvalidQuery = errors.New("invalid query")
-    ErrEmptyField   = errors.New("field name cannot be empty")
-    ErrEmptyValue   = errors.New("value cannot be empty")
+    
     ErrNoOptions    = errors.New("no query options provided")
 )
 ```
@@ -479,23 +478,7 @@ func boolPtr(b bool) *bool
 
 创建 bool 指针。
 
-## 验证函数
 
-### validateField
-
-```go
-func validateField(field string) error
-```
-
-验证字段名是否有效。
-
-### validateValue
-
-```go
-func validateValue(value interface{}) error
-```
-
-验证值是否有效。
 
 ## 使用模式
 

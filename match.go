@@ -13,13 +13,6 @@ import (
 //   esb.Match("title", "elasticsearch search")
 func Match(field, query string) QueryOption {
 	return func(q *types.Query) error {
-		if err := validateField(field); err != nil {
-			return err
-		}
-		if err := validateValue(query); err != nil {
-			return err
-		}
-		
 		if q.Match == nil {
 			q.Match = make(map[string]types.MatchQuery)
 		}
@@ -60,13 +53,6 @@ type MatchOptions struct {
 //   })
 func MatchWithOptions(field, query string, options MatchOptions) QueryOption {
 	return func(q *types.Query) error {
-		if err := validateField(field); err != nil {
-			return err
-		}
-		if err := validateValue(query); err != nil {
-			return err
-		}
-		
 		if q.Match == nil {
 			q.Match = make(map[string]types.MatchQuery)
 		}
@@ -129,13 +115,6 @@ func MatchWithOptions(field, query string, options MatchOptions) QueryOption {
 //   esb.MatchPhrase("content", "elasticsearch is awesome")
 func MatchPhrase(field, phrase string) QueryOption {
 	return func(q *types.Query) error {
-		if err := validateField(field); err != nil {
-			return err
-		}
-		if err := validateValue(phrase); err != nil {
-			return err
-		}
-		
 		if q.MatchPhrase == nil {
 			q.MatchPhrase = make(map[string]types.MatchPhraseQuery)
 		}
@@ -164,13 +143,6 @@ type MatchPhraseOptions struct {
 //   })
 func MatchPhraseWithOptions(field, phrase string, options MatchPhraseOptions) QueryOption {
 	return func(q *types.Query) error {
-		if err := validateField(field); err != nil {
-			return err
-		}
-		if err := validateValue(phrase); err != nil {
-			return err
-		}
-		
 		if q.MatchPhrase == nil {
 			q.MatchPhrase = make(map[string]types.MatchPhraseQuery)
 		}
@@ -203,13 +175,6 @@ func MatchPhraseWithOptions(field, phrase string, options MatchPhraseOptions) Qu
 //   esb.MatchPhrasePrefix("title", "elasticsearch sea")
 func MatchPhrasePrefix(field, prefix string) QueryOption {
 	return func(q *types.Query) error {
-		if err := validateField(field); err != nil {
-			return err
-		}
-		if err := validateValue(prefix); err != nil {
-			return err
-		}
-		
 		if q.MatchPhrasePrefix == nil {
 			q.MatchPhrasePrefix = make(map[string]types.MatchPhrasePrefixQuery)
 		}

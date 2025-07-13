@@ -23,31 +23,7 @@ func TestMatch(t *testing.T) {
 		}
 	})
 
-	t.Run("should return error for empty field", func(t *testing.T) {
-		query, err := NewQuery(Match("", "test"))
-		if err == nil {
-			t.Error("expected error for empty field")
-		}
-		if err != ErrEmptyField {
-			t.Errorf("expected ErrEmptyField, got %v", err)
-		}
-		if query != nil {
-			t.Error("expected nil query when error occurs")
-		}
-	})
 
-	t.Run("should return error for empty query", func(t *testing.T) {
-		query, err := NewQuery(Match("title", ""))
-		if err == nil {
-			t.Error("expected error for empty query")
-		}
-		if err != ErrEmptyValue {
-			t.Errorf("expected ErrEmptyValue, got %v", err)
-		}
-		if query != nil {
-			t.Error("expected nil query when error occurs")
-		}
-	})
 
 	t.Run("should support multiple match queries", func(t *testing.T) {
 		query, err := NewQuery(
@@ -178,31 +154,7 @@ func TestMatchPhrase(t *testing.T) {
 		}
 	})
 
-	t.Run("should return error for empty field", func(t *testing.T) {
-		query, err := NewQuery(MatchPhrase("", "test phrase"))
-		if err == nil {
-			t.Error("expected error for empty field")
-		}
-		if err != ErrEmptyField {
-			t.Errorf("expected ErrEmptyField, got %v", err)
-		}
-		if query != nil {
-			t.Error("expected nil query when error occurs")
-		}
-	})
 
-	t.Run("should return error for empty phrase", func(t *testing.T) {
-		query, err := NewQuery(MatchPhrase("content", ""))
-		if err == nil {
-			t.Error("expected error for empty phrase")
-		}
-		if err != ErrEmptyValue {
-			t.Errorf("expected ErrEmptyValue, got %v", err)
-		}
-		if query != nil {
-			t.Error("expected nil query when error occurs")
-		}
-	})
 }
 
 func TestMatchPhraseWithOptions(t *testing.T) {
@@ -268,31 +220,7 @@ func TestMatchPhrasePrefix(t *testing.T) {
 		}
 	})
 
-	t.Run("should return error for empty field", func(t *testing.T) {
-		query, err := NewQuery(MatchPhrasePrefix("", "test"))
-		if err == nil {
-			t.Error("expected error for empty field")
-		}
-		if err != ErrEmptyField {
-			t.Errorf("expected ErrEmptyField, got %v", err)
-		}
-		if query != nil {
-			t.Error("expected nil query when error occurs")
-		}
-	})
 
-	t.Run("should return error for empty prefix", func(t *testing.T) {
-		query, err := NewQuery(MatchPhrasePrefix("title", ""))
-		if err == nil {
-			t.Error("expected error for empty prefix")
-		}
-		if err != ErrEmptyValue {
-			t.Errorf("expected ErrEmptyValue, got %v", err)
-		}
-		if query != nil {
-			t.Error("expected nil query when error occurs")
-		}
-	})
 }
 
 func TestMatchInBoolQuery(t *testing.T) {

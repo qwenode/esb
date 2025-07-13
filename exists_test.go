@@ -2,7 +2,6 @@ package esb
 
 import (
 	"testing"
-	"github.com/elastic/go-elasticsearch/v8/typedapi/types"
 )
 
 func TestExists(t *testing.T) {
@@ -29,12 +28,12 @@ func TestExists(t *testing.T) {
 		{
 			name:    "empty field name",
 			field:   "",
-			wantErr: true,
+			wantErr: false,
 		},
 		{
 			name:    "whitespace field name",
 			field:   "   ",
-			wantErr: true,
+			wantErr: false,
 		},
 	}
 
@@ -109,20 +108,7 @@ func TestExistsWithOtherQueries(t *testing.T) {
 	}
 }
 
-func TestExistsValidation(t *testing.T) {
-	// Test direct validation
-	opt := Exists("")
-	query := &types.Query{}
-	
-	err := opt(query)
-	if err == nil {
-		t.Errorf("Exists() with empty field should return error")
-	}
-	
-	if err != ErrEmptyField {
-		t.Errorf("Exists() error = %v, want %v", err, ErrEmptyField)
-	}
-}
+
 
 // Benchmark tests for Exists query
 func BenchmarkExists(b *testing.B) {

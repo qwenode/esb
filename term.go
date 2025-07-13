@@ -11,13 +11,6 @@ import (
 //   esb.Term("status", "published")
 func Term(field, value string) QueryOption {
 	return func(q *types.Query) error {
-		if err := validateField(field); err != nil {
-			return err
-		}
-		if err := validateValue(value); err != nil {
-			return err
-		}
-		
 		if q.Term == nil {
 			q.Term = make(map[string]types.TermQuery)
 		}
@@ -37,19 +30,9 @@ func Term(field, value string) QueryOption {
 //   esb.Terms("category", "tech", "science", "programming")
 func Terms(field string, values ...string) QueryOption {
 	return func(q *types.Query) error {
-		if err := validateField(field); err != nil {
-			return err
-		}
-		if len(values) == 0 {
-			return ErrEmptyValue
-		}
-		
 		// Convert string values to FieldValue
 		fieldValues := make([]types.FieldValue, len(values))
 		for i, v := range values {
-			if err := validateValue(v); err != nil {
-				return err
-			}
 			fieldValues[i] = types.FieldValue(v)
 		}
 		

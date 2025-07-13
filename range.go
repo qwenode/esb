@@ -1,115 +1,299 @@
 package esb
 
 import (
-	"encoding/json"
 	"github.com/elastic/go-elasticsearch/v8/typedapi/types"
+	"github.com/elastic/go-elasticsearch/v8/typedapi/types/enums/rangerelation"
 )
 
-// RangeBuilder provides a fluent interface for building range queries.
-// It supports chaining methods for setting range conditions like Gte, Gt, Lte, Lt.
-type RangeBuilder struct {
+// =============================================================================
+// Type-Safe Range Query Builders
+// =============================================================================
+
+// NumberRangeBuilder provides a fluent interface for building number range queries.
+// It supports chaining methods for setting numeric range conditions.
+type NumberRangeBuilder struct {
 	field string
-	query types.UntypedRangeQuery
+	query types.NumberRangeQuery
 }
 
-// Range creates a new RangeBuilder for the specified field.
-// Use the builder methods to set range conditions, then call Build() to get the QueryOption.
+// DateRangeBuilder provides a fluent interface for building date range queries.
+// It supports chaining methods for setting date range conditions with format and timezone support.
+type DateRangeBuilder struct {
+	field string
+	query types.DateRangeQuery
+}
+
+// TermRangeBuilder provides a fluent interface for building term (string) range queries.
+// It supports chaining methods for setting string range conditions.
+type TermRangeBuilder struct {
+	field string
+	query types.TermRangeQuery
+}
+
+// =============================================================================
+// Factory Functions
+// =============================================================================
+
+// NumberRange creates a new NumberRangeBuilder for numeric range queries.
+// Use this for integer, float, and other numeric field types.
 //
 // Example:
-//   esb.Range("age").Gte(18).Lt(65).Build()
-//   esb.Range("price").Gt(10.0).Lte(100.0).Build()
-func Range(field string) *RangeBuilder {
-	return &RangeBuilder{
+//   esb.NumberRange("age").Gte(18.0).Lt(65.0).Build()
+//   esb.NumberRange("price").Gt(10.0).Lte(100.0).Build()
+func NumberRange(field string) *NumberRangeBuilder {
+	return &NumberRangeBuilder{
 		field: field,
-		query: types.UntypedRangeQuery{},
+		query: types.NumberRangeQuery{},
 	}
 }
 
-// Gte sets the "greater than or equal to" condition.
-// Supports numbers, strings, and dates.
-func (rb *RangeBuilder) Gte(value interface{}) *RangeBuilder {
-	rb.query.Gte = marshalValue(value)
-	return rb
+// DateRange creates a new DateRangeBuilder for date range queries.
+// Use this for date field types with support for format and timezone.
+//
+// Example:
+//   esb.DateRange("created_at").Gte("2023-01-01").Format("yyyy-MM-dd").Build()
+//   esb.DateRange("timestamp").Gt("now-1d").TimeZone("UTC").Build()
+func DateRange(field string) *DateRangeBuilder {
+	return &DateRangeBuilder{
+		field: field,
+		query: types.DateRangeQuery{},
+	}
 }
 
-// Gt sets the "greater than" condition.
-// Supports numbers, strings, and dates.
-func (rb *RangeBuilder) Gt(value interface{}) *RangeBuilder {
-	rb.query.Gt = marshalValue(value)
-	return rb
+// TermRange creates a new TermRangeBuilder for string/term range queries.
+// Use this for keyword, text, and other string field types.
+//
+// Example:
+//   esb.TermRange("username").Gte("alice").Lt("bob").Build()
+//   esb.TermRange("category").From("electronics").To("home").Build()
+func TermRange(field string) *TermRangeBuilder {
+	return &TermRangeBuilder{
+		field: field,
+		query: types.TermRangeQuery{},
+	}
 }
 
-// Lte sets the "less than or equal to" condition.
-// Supports numbers, strings, and dates.
-func (rb *RangeBuilder) Lte(value interface{}) *RangeBuilder {
-	rb.query.Lte = marshalValue(value)
-	return rb
+// =============================================================================
+// NumberRangeBuilder Methods
+// =============================================================================
+
+// Gte sets the "greater than or equal to" condition for numeric values.
+func (b *NumberRangeBuilder) Gte(value float64) *NumberRangeBuilder {
+	floatVal := types.Float64(value)
+	b.query.Gte = &floatVal
+	return b
 }
 
-// Lt sets the "less than" condition.
-// Supports numbers, strings, and dates.
-func (rb *RangeBuilder) Lt(value interface{}) *RangeBuilder {
-	rb.query.Lt = marshalValue(value)
-	return rb
+// Gt sets the "greater than" condition for numeric values.
+func (b *NumberRangeBuilder) Gt(value float64) *NumberRangeBuilder {
+	floatVal := types.Float64(value)
+	b.query.Gt = &floatVal
+	return b
 }
 
-// From sets the "from" condition (inclusive).
-// Supports numbers, strings, and dates.
-func (rb *RangeBuilder) From(value interface{}) *RangeBuilder {
-	val := marshalValue(value)
-	rb.query.From = &val
-	return rb
+// Lte sets the "less than or equal to" condition for numeric values.
+func (b *NumberRangeBuilder) Lte(value float64) *NumberRangeBuilder {
+	floatVal := types.Float64(value)
+	b.query.Lte = &floatVal
+	return b
 }
 
-// To sets the "to" condition (exclusive).
-// Supports numbers, strings, and dates.
-func (rb *RangeBuilder) To(value interface{}) *RangeBuilder {
-	val := marshalValue(value)
-	rb.query.To = &val
-	return rb
+// Lt sets the "less than" condition for numeric values.
+func (b *NumberRangeBuilder) Lt(value float64) *NumberRangeBuilder {
+	floatVal := types.Float64(value)
+	b.query.Lt = &floatVal
+	return b
 }
 
-// Boost sets the boost value for the query.
-func (rb *RangeBuilder) Boost(boost float32) *RangeBuilder {
-	rb.query.Boost = &boost
-	return rb
+// From sets the "from" condition (inclusive) for numeric values.
+func (b *NumberRangeBuilder) From(value float64) *NumberRangeBuilder {
+	floatVal := types.Float64(value)
+	b.query.From = &floatVal
+	return b
 }
 
-// Format sets the date format for date range queries.
-func (rb *RangeBuilder) Format(format string) *RangeBuilder {
-	rb.query.Format = &format
-	return rb
+// To sets the "to" condition (exclusive) for numeric values.
+func (b *NumberRangeBuilder) To(value float64) *NumberRangeBuilder {
+	floatVal := types.Float64(value)
+	b.query.To = &floatVal
+	return b
 }
 
-// TimeZone sets the time zone for date range queries.
-func (rb *RangeBuilder) TimeZone(timeZone string) *RangeBuilder {
-	rb.query.TimeZone = &timeZone
-	return rb
+// Boost sets the boost value for the numeric range query.
+func (b *NumberRangeBuilder) Boost(boost float32) *NumberRangeBuilder {
+	b.query.Boost = &boost
+	return b
 }
 
-// Build creates the QueryOption from the configured range builder.
-// This method validates the field and returns the final QueryOption.
-func (rb *RangeBuilder) Build() QueryOption {
+// QueryName sets the query name for the numeric range query.
+func (b *NumberRangeBuilder) QueryName(name string) *NumberRangeBuilder {
+	b.query.QueryName_ = &name
+	return b
+}
+
+// Relation sets the relation for the numeric range query.
+func (b *NumberRangeBuilder) Relation(relation *rangerelation.RangeRelation) *NumberRangeBuilder {
+	b.query.Relation = relation
+	return b
+}
+
+// Build creates the QueryOption from the configured numeric range builder.
+func (b *NumberRangeBuilder) Build() QueryOption {
 	return func(q *types.Query) error {
-		if err := validateField(rb.field); err != nil {
-			return err
-		}
-		
 		if q.Range == nil {
 			q.Range = make(map[string]types.RangeQuery)
 		}
-		
-		q.Range[rb.field] = rb.query
+		q.Range[b.field] = b.query
 		return nil
 	}
 }
 
-// marshalValue converts a value to json.RawMessage for the UntypedRangeQuery.
-func marshalValue(value interface{}) json.RawMessage {
-	data, err := json.Marshal(value)
-	if err != nil {
-		// Fallback to string representation if marshaling fails
-		return json.RawMessage(`"` + "invalid_value" + `"`)
+// =============================================================================
+// DateRangeBuilder Methods
+// =============================================================================
+
+// Gte sets the "greater than or equal to" condition for date values.
+func (b *DateRangeBuilder) Gte(value string) *DateRangeBuilder {
+	b.query.Gte = &value
+	return b
+}
+
+// Gt sets the "greater than" condition for date values.
+func (b *DateRangeBuilder) Gt(value string) *DateRangeBuilder {
+	b.query.Gt = &value
+	return b
+}
+
+// Lte sets the "less than or equal to" condition for date values.
+func (b *DateRangeBuilder) Lte(value string) *DateRangeBuilder {
+	b.query.Lte = &value
+	return b
+}
+
+// Lt sets the "less than" condition for date values.
+func (b *DateRangeBuilder) Lt(value string) *DateRangeBuilder {
+	b.query.Lt = &value
+	return b
+}
+
+// From sets the "from" condition (inclusive) for date values.
+func (b *DateRangeBuilder) From(value string) *DateRangeBuilder {
+	b.query.From = &value
+	return b
+}
+
+// To sets the "to" condition (exclusive) for date values.
+func (b *DateRangeBuilder) To(value string) *DateRangeBuilder {
+	b.query.To = &value
+	return b
+}
+
+// Format sets the date format for date range queries.
+func (b *DateRangeBuilder) Format(format string) *DateRangeBuilder {
+	b.query.Format = &format
+	return b
+}
+
+// TimeZone sets the time zone for date range queries.
+func (b *DateRangeBuilder) TimeZone(timeZone string) *DateRangeBuilder {
+	b.query.TimeZone = &timeZone
+	return b
+}
+
+// Boost sets the boost value for the date range query.
+func (b *DateRangeBuilder) Boost(boost float32) *DateRangeBuilder {
+	b.query.Boost = &boost
+	return b
+}
+
+// QueryName sets the query name for the date range query.
+func (b *DateRangeBuilder) QueryName(name string) *DateRangeBuilder {
+	b.query.QueryName_ = &name
+	return b
+}
+
+// Relation sets the relation for the date range query.
+func (b *DateRangeBuilder) Relation(relation *rangerelation.RangeRelation) *DateRangeBuilder {
+	b.query.Relation = relation
+	return b
+}
+
+// Build creates the QueryOption from the configured date range builder.
+func (b *DateRangeBuilder) Build() QueryOption {
+	return func(q *types.Query) error {
+		if q.Range == nil {
+			q.Range = make(map[string]types.RangeQuery)
+		}
+		q.Range[b.field] = b.query
+		return nil
 	}
-	return json.RawMessage(data)
+}
+
+// =============================================================================
+// TermRangeBuilder Methods
+// =============================================================================
+
+// Gte sets the "greater than or equal to" condition for string values.
+func (b *TermRangeBuilder) Gte(value string) *TermRangeBuilder {
+	b.query.Gte = &value
+	return b
+}
+
+// Gt sets the "greater than" condition for string values.
+func (b *TermRangeBuilder) Gt(value string) *TermRangeBuilder {
+	b.query.Gt = &value
+	return b
+}
+
+// Lte sets the "less than or equal to" condition for string values.
+func (b *TermRangeBuilder) Lte(value string) *TermRangeBuilder {
+	b.query.Lte = &value
+	return b
+}
+
+// Lt sets the "less than" condition for string values.
+func (b *TermRangeBuilder) Lt(value string) *TermRangeBuilder {
+	b.query.Lt = &value
+	return b
+}
+
+// From sets the "from" condition (inclusive) for string values.
+func (b *TermRangeBuilder) From(value string) *TermRangeBuilder {
+	b.query.From = &value
+	return b
+}
+
+// To sets the "to" condition (exclusive) for string values.
+func (b *TermRangeBuilder) To(value string) *TermRangeBuilder {
+	b.query.To = &value
+	return b
+}
+
+// Boost sets the boost value for the term range query.
+func (b *TermRangeBuilder) Boost(boost float32) *TermRangeBuilder {
+	b.query.Boost = &boost
+	return b
+}
+
+// QueryName sets the query name for the term range query.
+func (b *TermRangeBuilder) QueryName(name string) *TermRangeBuilder {
+	b.query.QueryName_ = &name
+	return b
+}
+
+// Relation sets the relation for the term range query.
+func (b *TermRangeBuilder) Relation(relation *rangerelation.RangeRelation) *TermRangeBuilder {
+	b.query.Relation = relation
+	return b
+}
+
+// Build creates the QueryOption from the configured term range builder.
+func (b *TermRangeBuilder) Build() QueryOption {
+	return func(q *types.Query) error {
+		if q.Range == nil {
+			q.Range = make(map[string]types.RangeQuery)
+		}
+		q.Range[b.field] = b.query
+		return nil
+	}
 } 

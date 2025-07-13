@@ -5,7 +5,6 @@ package esb
 
 import (
 	"errors"
-	"strings"
 	"github.com/elastic/go-elasticsearch/v8/typedapi/types"
 )
 
@@ -16,8 +15,6 @@ type QueryOption func(*types.Query) error
 // Common errors returned by the query builder.
 var (
 	ErrInvalidQuery = errors.New("invalid query")
-	ErrEmptyField   = errors.New("field name cannot be empty")
-	ErrEmptyValue   = errors.New("value cannot be empty")
 	ErrNoOptions    = errors.New("no query options provided")
 )
 
@@ -51,20 +48,4 @@ func NewQuery(opts ...QueryOption) (*types.Query, error) {
 	}
 	
 	return query, nil
-}
-
-// validateField checks if a field name is valid (non-empty).
-func validateField(field string) error {
-	if field == "" || strings.TrimSpace(field) == "" {
-		return ErrEmptyField
-	}
-	return nil
-}
-
-// validateValue checks if a value is valid (non-empty for strings).
-func validateValue(value interface{}) error {
-	if str, ok := value.(string); ok && str == "" {
-		return ErrEmptyValue
-	}
-	return nil
 } 

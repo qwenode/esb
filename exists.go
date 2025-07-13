@@ -13,10 +13,6 @@ import (
 //   esb.Exists("metadata.timestamp")
 func Exists(field string) QueryOption {
 	return func(q *types.Query) error {
-		if err := validateField(field); err != nil {
-			return err
-		}
-		
 		q.Exists = &types.ExistsQuery{
 			Field: field,
 		}

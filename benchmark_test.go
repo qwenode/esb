@@ -3,6 +3,7 @@ package esb
 import (
 	"testing"
 	"github.com/elastic/go-elasticsearch/v8/typedapi/types"
+	"github.com/elastic/go-elasticsearch/v8/typedapi/types/enums/operator"
 )
 
 // BenchmarkSimpleQuery compares simple query construction
@@ -59,7 +60,7 @@ func BenchmarkMatchQueryConstruction(b *testing.B) {
 func BenchmarkRangeQuery(b *testing.B) {
 	b.Run("ESB_Range", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			_, err := NewQuery(Range("age").Gte(18).Lt(65).Build())
+			_, err := NewQuery(NumberRange("age").Gte(18.0).Lt(65.0).Build())
 			if err != nil {
 				b.Errorf("ESB Range query failed: %v", err)
 			}
@@ -93,7 +94,7 @@ func BenchmarkBoolQueryConstruction(b *testing.B) {
 					),
 					Should(
 						Term("category", "tech"),
-						Range("score").Gte(4.0).Build(),
+						NumberRange("score").Gte(4.0).Build(),
 					),
 				),
 			)
@@ -154,17 +155,17 @@ func BenchmarkComplexQuery(b *testing.B) {
 				Bool(
 					Must(
 						Match("title", "elasticsearch guide"),
-						Range("publish_date").Gte("2023-01-01").Lte("2023-12-31").Build(),
+						DateRange("publish_date").Gte("2023-01-01").Lte("2023-12-31").Build(),
 						Exists("author"),
 					),
 					Should(
 						MatchPhrase("content", "search engine"),
 						Term("category", "technology"),
-						Range("views").Gte(1000).Build(),
+						NumberRange("views").Gte(1000.0).Build(),
 					),
 					Filter(
 						Term("status", "published"),
-						Range("score").Gte(4.0).Build(),
+						NumberRange("score").Gte(4.0).Build(),
 					),
 					MustNot(
 						Term("deleted", "true"),
@@ -279,7 +280,7 @@ func BenchmarkNestedBoolQuery(b *testing.B) {
 						),
 						Bool(
 							Must(
-								Range("date").Gte("2023-01-01").Build(),
+								DateRange("date").Gte("2023-01-01").Build(),
 								Exists("author"),
 							),
 							MustNot(
@@ -361,9 +362,9 @@ func BenchmarkMatchWithOptions(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			_, err := NewQuery(
 				MatchWithOptions("title", "elasticsearch guide", MatchOptions{
-					Fuzziness: "AUTO",
-					Analyzer:  stringPtr("standard"),
-					Boost:     float32Ptr(1.5),
+					Boost:    float32Ptr(2.0),
+					Analyzer: stringPtr("standard"),
+					Operator: &operator.And,
 				}),
 			)
 			if err != nil {
@@ -374,15 +375,16 @@ func BenchmarkMatchWithOptions(b *testing.B) {
 	
 	b.Run("Native_MatchWithOptions", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
+			boost := float32(2.0)
 			analyzer := "standard"
-			boost := float32(1.5)
+			op := operator.And
 			query := &types.Query{
 				Match: map[string]types.MatchQuery{
 					"title": {
-						Query:     "elasticsearch guide",
-						Fuzziness: "AUTO",
-						Analyzer:  &analyzer,
-						Boost:     &boost,
+						Query:    "elasticsearch guide",
+						Boost:    &boost,
+						Analyzer: &analyzer,
+						Operator: &op,
 					},
 				},
 			}
@@ -444,7 +446,7 @@ func BenchmarkRangeWithOptions(b *testing.B) {
 	b.Run("ESB_RangeWithOptions", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			_, err := NewQuery(
-				Range("timestamp").
+				DateRange("timestamp").
 					Gte("2023-01-01").
 					Lte("2023-12-31").
 					Format("yyyy-MM-dd").
@@ -488,7 +490,7 @@ func BenchmarkMemoryAllocation(b *testing.B) {
 				Bool(
 					Must(
 						Match("title", "elasticsearch"),
-						Range("date").Gte("2023-01-01").Build(),
+						DateRange("date").Gte("2023-01-01").Build(),
 					),
 				),
 			)

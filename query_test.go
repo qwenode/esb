@@ -123,60 +123,7 @@ func TestNewQuery(t *testing.T) {
 	})
 }
 
-func TestValidateField(t *testing.T) {
-	t.Run("should return error for empty field", func(t *testing.T) {
-		err := validateField("")
-		if err == nil {
-			t.Error("expected error for empty field")
-		}
-		if err != ErrEmptyField {
-			t.Errorf("expected ErrEmptyField, got %v", err)
-		}
-	})
 
-	t.Run("should return nil for valid field", func(t *testing.T) {
-		err := validateField("valid_field")
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-	})
-}
-
-func TestValidateValue(t *testing.T) {
-	t.Run("should return error for empty string value", func(t *testing.T) {
-		err := validateValue("")
-		if err == nil {
-			t.Error("expected error for empty string value")
-		}
-		if err != ErrEmptyValue {
-			t.Errorf("expected ErrEmptyValue, got %v", err)
-		}
-	})
-
-	t.Run("should return nil for valid string value", func(t *testing.T) {
-		err := validateValue("valid_value")
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-	})
-
-	t.Run("should return nil for non-string values", func(t *testing.T) {
-		err := validateValue(123)
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		
-		err = validateValue(true)
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		
-		err = validateValue(nil)
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-	})
-}
 
 // Benchmark tests to ensure performance is acceptable
 func BenchmarkNewQuery(b *testing.B) {

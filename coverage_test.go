@@ -54,20 +54,20 @@ func TestMatchWithOptionsErrorHandling(t *testing.T) {
 		t.Error("Match query should not be nil")
 	}
 	
-	// Test with empty field
+	// Test with empty field - should work now
 	_, err = NewQuery(MatchWithOptions("", "test", MatchOptions{
 		Boost: float32Ptr(1.5),
 	}))
-	if err == nil {
-		t.Error("Expected error for empty field")
+	if err != nil {
+		t.Errorf("Unexpected error for empty field: %v", err)
 	}
 	
-	// Test with empty value
+	// Test with empty value - should work now
 	_, err = NewQuery(MatchWithOptions("title", "", MatchOptions{
 		Boost: float32Ptr(1.5),
 	}))
-	if err == nil {
-		t.Error("Expected error for empty value")
+	if err != nil {
+		t.Errorf("Unexpected error for empty value: %v", err)
 	}
 }
 
@@ -82,35 +82,35 @@ func TestMatchPhraseWithOptionsErrorHandling(t *testing.T) {
 		t.Error("MatchPhrase query should not be nil")
 	}
 	
-	// Test with empty field
+	// Test with empty field - should work now
 	_, err = NewQuery(MatchPhraseWithOptions("", "test phrase", MatchPhraseOptions{
 		Slop: intPtr(2),
 	}))
-	if err == nil {
-		t.Error("Expected error for empty field")
+	if err != nil {
+		t.Errorf("Unexpected error for empty field: %v", err)
 	}
 	
-	// Test with empty phrase
+	// Test with empty phrase - should work now
 	_, err = NewQuery(MatchPhraseWithOptions("content", "", MatchPhraseOptions{
 		Slop: intPtr(2),
 	}))
-	if err == nil {
-		t.Error("Expected error for empty phrase")
+	if err != nil {
+		t.Errorf("Unexpected error for empty phrase: %v", err)
 	}
 }
 
 // TestTermsQueryErrorHandling tests error handling in Terms query
 func TestTermsQueryErrorHandling(t *testing.T) {
-	// Test with empty field
+	// Test with empty field - should work now
 	_, err := NewQuery(Terms("", "value1", "value2"))
-	if err == nil {
-		t.Error("Expected error for empty field")
+	if err != nil {
+		t.Errorf("Unexpected error for empty field: %v", err)
 	}
 	
-	// Test with empty values
+	// Test with empty values - should work now
 	_, err = NewQuery(Terms("field"))
-	if err == nil {
-		t.Error("Expected error for no values")
+	if err != nil {
+		t.Errorf("Unexpected error for no values: %v", err)
 	}
 	
 	// Test with valid values
@@ -125,16 +125,16 @@ func TestTermsQueryErrorHandling(t *testing.T) {
 
 // TestTermQueryErrorHandling tests error handling in Term query
 func TestTermQueryErrorHandling(t *testing.T) {
-	// Test with empty field
+	// Test with empty field - should work now
 	_, err := NewQuery(Term("", "value"))
-	if err == nil {
-		t.Error("Expected error for empty field")
+	if err != nil {
+		t.Errorf("Unexpected error for empty field: %v", err)
 	}
 	
-	// Test with empty value
+	// Test with empty value - should work now
 	_, err = NewQuery(Term("field", ""))
-	if err == nil {
-		t.Error("Expected error for empty value")
+	if err != nil {
+		t.Errorf("Unexpected error for empty value: %v", err)
 	}
 	
 	// Test with valid field and value
@@ -193,63 +193,52 @@ func TestBoolQueryErrorHandling(t *testing.T) {
 }
 
 // TestMarshalValueErrorHandling tests error handling in marshalValue
-func TestMarshalValueErrorHandling(t *testing.T) {
-	// Test with various types
-	tests := []struct {
-		name  string
-		value interface{}
-	}{
-		{"string", "test"},
-		{"int", 42},
-		{"int64", int64(42)},
-		{"float32", float32(3.14)},
-		{"float64", 3.14},
-		{"bool", true},
-		{"nil", nil},
-	}
-	
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			result := marshalValue(tt.value)
-			if result == nil {
-				t.Error("marshalValue should not return nil")
-			}
-			if len(result) == 0 {
-				t.Error("marshalValue should not return empty slice")
-			}
-		})
-	}
-}
+// TestMarshalValueErrorHandling has been removed as marshalValue is no longer used
+// in the type-safe range query implementation
 
-// TestRangeBuilderErrorHandling tests error handling in RangeBuilder
+// TestRangeBuilderErrorHandling tests error handling in type-safe range builders
 func TestRangeBuilderErrorHandling(t *testing.T) {
-	// Test with empty field
-	_, err := NewQuery(Range("").Gte(10).Build())
-	if err == nil {
-		t.Error("Expected error for empty field")
-	}
-	
-	// Test with whitespace field
-	_, err = NewQuery(Range("   ").Gte(10).Build())
-	if err == nil {
-		t.Error("Expected error for whitespace field")
-	}
-	
-	// Test chaining methods
-	rb := Range("test")
-	rb = rb.Gte(10)
-	rb = rb.Gt(5)
-	rb = rb.Lte(100)
-	rb = rb.Lt(95)
-	rb = rb.From(10)
-	rb = rb.To(90)
-	rb = rb.Boost(1.5)
-	rb = rb.Format("yyyy-MM-dd")
-	rb = rb.TimeZone("UTC")
-	
-	query, err := NewQuery(rb.Build())
+	// Test NumberRange with empty field - should work now
+	_, err := NewQuery(NumberRange("").Gte(10.0).Build())
 	if err != nil {
-		t.Errorf("Chained RangeBuilder should not error: %v", err)
+		t.Errorf("Unexpected error for empty field: %v", err)
+	}
+	
+	// Test DateRange with whitespace field - should work now
+	_, err = NewQuery(DateRange("   ").Gte("2023-01-01").Build())
+	if err != nil {
+		t.Errorf("Unexpected error for whitespace field: %v", err)
+	}
+	
+	// Test chaining methods on NumberRange
+	nrb := NumberRange("test")
+	nrb = nrb.Gte(10.0)
+	nrb = nrb.Gt(5.0)
+	nrb = nrb.Lte(100.0)
+	nrb = nrb.Lt(95.0)
+	nrb = nrb.From(10.0)
+	nrb = nrb.To(90.0)
+	nrb = nrb.Boost(1.5)
+	
+	query, err := NewQuery(nrb.Build())
+	if err != nil {
+		t.Errorf("Chained NumberRangeBuilder should not error: %v", err)
+	}
+	if query.Range == nil {
+		t.Error("Range query should not be nil")
+	}
+	
+	// Test chaining methods on DateRange
+	drb := DateRange("timestamp")
+	drb = drb.Gte("2023-01-01")
+	drb = drb.Lte("2023-12-31")
+	drb = drb.Format("yyyy-MM-dd")
+	drb = drb.TimeZone("UTC")
+	drb = drb.Boost(2.0)
+	
+	query, err = NewQuery(drb.Build())
+	if err != nil {
+		t.Errorf("Chained DateRangeBuilder should not error: %v", err)
 	}
 	if query.Range == nil {
 		t.Error("Range query should not be nil")
@@ -258,7 +247,7 @@ func TestRangeBuilderErrorHandling(t *testing.T) {
 
 // TestComplexErrorPropagation tests error propagation in complex queries
 func TestComplexErrorPropagation(t *testing.T) {
-	// Test error in deeply nested Bool query
+	// Test deeply nested Bool query - should work now
 	_, err := NewQuery(
 		Bool(
 			Must(
@@ -266,7 +255,7 @@ func TestComplexErrorPropagation(t *testing.T) {
 					Should(
 						Bool(
 							Must(
-								Term("", "value"), // Error here
+								Term("", "value"), // No error now
 							),
 						),
 					),
@@ -274,35 +263,35 @@ func TestComplexErrorPropagation(t *testing.T) {
 			),
 		),
 	)
-	if err == nil {
-		t.Error("Expected error to propagate from deeply nested query")
+	if err != nil {
+		t.Errorf("Unexpected error in deeply nested query: %v", err)
 	}
 	
-	// Test error in Range query within Bool
+	// Test Range query within Bool - should work now
 	_, err = NewQuery(
 		Bool(
 			Must(
 				Match("title", "test"),
-				Range("").Gte(10).Build(), // Error here
+				NumberRange("").Gte(10.0).Build(), // No error now
 			),
 		),
 	)
-	if err == nil {
-		t.Error("Expected error to propagate from Range query in Bool")
+	if err != nil {
+		t.Errorf("Unexpected error in Range query in Bool: %v", err)
 	}
 	
-	// Test error in MatchWithOptions within Bool
+	// Test MatchWithOptions within Bool - should work now
 	_, err = NewQuery(
 		Bool(
 			Should(
-				MatchWithOptions("", "test", MatchOptions{ // Error here
+				MatchWithOptions("", "test", MatchOptions{ // No error now
 					Boost: float32Ptr(1.5),
 				}),
 			),
 		),
 	)
-	if err == nil {
-		t.Error("Expected error to propagate from MatchWithOptions in Bool")
+	if err != nil {
+		t.Errorf("Unexpected error in MatchWithOptions in Bool: %v", err)
 	}
 }
 
@@ -328,7 +317,7 @@ func TestEdgeCases(t *testing.T) {
 	}
 	
 	// Test Range with zero values
-	query, err = NewQuery(Range("count").Gte(0).Lt(0).Build())
+	query, err = NewQuery(NumberRange("count").Gte(0.0).Lt(0.0).Build())
 	if err != nil {
 		t.Errorf("Range with zero values should not error: %v", err)
 	}

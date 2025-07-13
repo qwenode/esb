@@ -1,0 +1,443 @@
+package esb
+
+import (
+	"testing"
+	"github.com/elastic/go-elasticsearch/v8/typedapi/types"
+	"github.com/elastic/go-elasticsearch/v8/typedapi/types/enums/operator"
+)
+
+func TestMatch(t *testing.T) {
+	t.Run("should create basic match query", func(t *testing.T) {
+		query, err := NewQuery(Match("title", "elasticsearch search"))
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if query == nil {
+			t.Error("expected non-nil query")
+		}
+		if query.Match == nil {
+			t.Error("expected Match query")
+		}
+		if query.Match["title"].Query != "elasticsearch search" {
+			t.Errorf("expected query 'elasticsearch search', got %s", query.Match["title"].Query)
+		}
+	})
+
+	t.Run("should return error for empty field", func(t *testing.T) {
+		query, err := NewQuery(Match("", "test"))
+		if err == nil {
+			t.Error("expected error for empty field")
+		}
+		if err != ErrEmptyField {
+			t.Errorf("expected ErrEmptyField, got %v", err)
+		}
+		if query != nil {
+			t.Error("expected nil query when error occurs")
+		}
+	})
+
+	t.Run("should return error for empty query", func(t *testing.T) {
+		query, err := NewQuery(Match("title", ""))
+		if err == nil {
+			t.Error("expected error for empty query")
+		}
+		if err != ErrEmptyValue {
+			t.Errorf("expected ErrEmptyValue, got %v", err)
+		}
+		if query != nil {
+			t.Error("expected nil query when error occurs")
+		}
+	})
+
+	t.Run("should support multiple match queries", func(t *testing.T) {
+		query, err := NewQuery(
+			Match("title", "elasticsearch"),
+			Match("content", "search engine"),
+		)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if query.Match == nil {
+			t.Error("expected Match query")
+		}
+		if len(query.Match) != 2 {
+			t.Errorf("expected 2 match queries, got %d", len(query.Match))
+		}
+		if query.Match["title"].Query != "elasticsearch" {
+			t.Errorf("expected title query 'elasticsearch', got %s", query.Match["title"].Query)
+		}
+		if query.Match["content"].Query != "search engine" {
+			t.Errorf("expected content query 'search engine', got %s", query.Match["content"].Query)
+		}
+	})
+}
+
+func TestMatchWithOptions(t *testing.T) {
+	t.Run("should create match query with operator", func(t *testing.T) {
+		op := operator.And
+		query, err := NewQuery(
+			MatchWithOptions("title", "elasticsearch search", MatchOptions{
+				Operator: &op,
+			}),
+		)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if query.Match == nil {
+			t.Error("expected Match query")
+		}
+		if query.Match["title"].Operator == nil {
+			t.Error("expected operator to be set")
+		}
+		if *query.Match["title"].Operator != operator.And {
+			t.Errorf("expected operator AND, got %v", *query.Match["title"].Operator)
+		}
+	})
+
+	t.Run("should create match query with fuzziness", func(t *testing.T) {
+		fuzziness := types.Fuzziness("AUTO")
+		query, err := NewQuery(
+			MatchWithOptions("title", "elasticsearch", MatchOptions{
+				Fuzziness: fuzziness,
+			}),
+		)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if query.Match["title"].Fuzziness == nil {
+			t.Error("expected fuzziness to be set")
+		}
+		if query.Match["title"].Fuzziness != types.Fuzziness("AUTO") {
+			t.Errorf("expected fuzziness AUTO, got %v", query.Match["title"].Fuzziness)
+		}
+	})
+
+	t.Run("should create match query with multiple options", func(t *testing.T) {
+		op := operator.And
+		analyzer := "standard"
+		boost := float32(1.5)
+		lenient := true
+		
+		query, err := NewQuery(
+			MatchWithOptions("title", "elasticsearch search", MatchOptions{
+				Operator: &op,
+				Analyzer: &analyzer,
+				Boost:    &boost,
+				Lenient:  &lenient,
+			}),
+		)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		
+		matchQuery := query.Match["title"]
+		if matchQuery.Operator == nil || *matchQuery.Operator != operator.And {
+			t.Error("expected operator to be AND")
+		}
+		if matchQuery.Analyzer == nil || *matchQuery.Analyzer != "standard" {
+			t.Error("expected analyzer to be 'standard'")
+		}
+		if matchQuery.Boost == nil || *matchQuery.Boost != 1.5 {
+			t.Error("expected boost to be 1.5")
+		}
+		if matchQuery.Lenient == nil || *matchQuery.Lenient != true {
+			t.Error("expected lenient to be true")
+		}
+	})
+
+	t.Run("should work with empty options", func(t *testing.T) {
+		query, err := NewQuery(
+			MatchWithOptions("title", "elasticsearch", MatchOptions{}),
+		)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if query.Match == nil {
+			t.Error("expected Match query")
+		}
+		if query.Match["title"].Query != "elasticsearch" {
+			t.Errorf("expected query 'elasticsearch', got %s", query.Match["title"].Query)
+		}
+	})
+}
+
+func TestMatchPhrase(t *testing.T) {
+	t.Run("should create match phrase query", func(t *testing.T) {
+		query, err := NewQuery(MatchPhrase("content", "elasticsearch is awesome"))
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if query == nil {
+			t.Error("expected non-nil query")
+		}
+		if query.MatchPhrase == nil {
+			t.Error("expected MatchPhrase query")
+		}
+		if query.MatchPhrase["content"].Query != "elasticsearch is awesome" {
+			t.Errorf("expected query 'elasticsearch is awesome', got %s", query.MatchPhrase["content"].Query)
+		}
+	})
+
+	t.Run("should return error for empty field", func(t *testing.T) {
+		query, err := NewQuery(MatchPhrase("", "test phrase"))
+		if err == nil {
+			t.Error("expected error for empty field")
+		}
+		if err != ErrEmptyField {
+			t.Errorf("expected ErrEmptyField, got %v", err)
+		}
+		if query != nil {
+			t.Error("expected nil query when error occurs")
+		}
+	})
+
+	t.Run("should return error for empty phrase", func(t *testing.T) {
+		query, err := NewQuery(MatchPhrase("content", ""))
+		if err == nil {
+			t.Error("expected error for empty phrase")
+		}
+		if err != ErrEmptyValue {
+			t.Errorf("expected ErrEmptyValue, got %v", err)
+		}
+		if query != nil {
+			t.Error("expected nil query when error occurs")
+		}
+	})
+}
+
+func TestMatchPhraseWithOptions(t *testing.T) {
+	t.Run("should create match phrase query with slop", func(t *testing.T) {
+		slop := 2
+		query, err := NewQuery(
+			MatchPhraseWithOptions("content", "elasticsearch search", MatchPhraseOptions{
+				Slop: &slop,
+			}),
+		)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if query.MatchPhrase == nil {
+			t.Error("expected MatchPhrase query")
+		}
+		if query.MatchPhrase["content"].Slop == nil {
+			t.Error("expected slop to be set")
+		}
+		if *query.MatchPhrase["content"].Slop != 2 {
+			t.Errorf("expected slop 2, got %d", *query.MatchPhrase["content"].Slop)
+		}
+	})
+
+	t.Run("should create match phrase query with analyzer and boost", func(t *testing.T) {
+		analyzer := "keyword"
+		boost := float32(2.0)
+		
+		query, err := NewQuery(
+			MatchPhraseWithOptions("content", "exact phrase", MatchPhraseOptions{
+				Analyzer: &analyzer,
+				Boost:    &boost,
+			}),
+		)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		
+		matchPhraseQuery := query.MatchPhrase["content"]
+		if matchPhraseQuery.Analyzer == nil || *matchPhraseQuery.Analyzer != "keyword" {
+			t.Error("expected analyzer to be 'keyword'")
+		}
+		if matchPhraseQuery.Boost == nil || *matchPhraseQuery.Boost != 2.0 {
+			t.Error("expected boost to be 2.0")
+		}
+	})
+}
+
+func TestMatchPhrasePrefix(t *testing.T) {
+	t.Run("should create match phrase prefix query", func(t *testing.T) {
+		query, err := NewQuery(MatchPhrasePrefix("title", "elasticsearch sea"))
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if query == nil {
+			t.Error("expected non-nil query")
+		}
+		if query.MatchPhrasePrefix == nil {
+			t.Error("expected MatchPhrasePrefix query")
+		}
+		if query.MatchPhrasePrefix["title"].Query != "elasticsearch sea" {
+			t.Errorf("expected query 'elasticsearch sea', got %s", query.MatchPhrasePrefix["title"].Query)
+		}
+	})
+
+	t.Run("should return error for empty field", func(t *testing.T) {
+		query, err := NewQuery(MatchPhrasePrefix("", "test"))
+		if err == nil {
+			t.Error("expected error for empty field")
+		}
+		if err != ErrEmptyField {
+			t.Errorf("expected ErrEmptyField, got %v", err)
+		}
+		if query != nil {
+			t.Error("expected nil query when error occurs")
+		}
+	})
+
+	t.Run("should return error for empty prefix", func(t *testing.T) {
+		query, err := NewQuery(MatchPhrasePrefix("title", ""))
+		if err == nil {
+			t.Error("expected error for empty prefix")
+		}
+		if err != ErrEmptyValue {
+			t.Errorf("expected ErrEmptyValue, got %v", err)
+		}
+		if query != nil {
+			t.Error("expected nil query when error occurs")
+		}
+	})
+}
+
+func TestMatchInBoolQuery(t *testing.T) {
+	t.Run("should work with Bool query", func(t *testing.T) {
+		query, err := NewQuery(
+			Bool(
+				Must(
+					Match("title", "elasticsearch"),
+					MatchPhrase("content", "search engine"),
+				),
+				Should(
+					Match("tags", "database"),
+					MatchPhrasePrefix("description", "fast sea"),
+				),
+			),
+		)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if query.Bool == nil {
+			t.Error("expected Bool query")
+		}
+		if len(query.Bool.Must) != 2 {
+			t.Errorf("expected 2 Must clauses, got %d", len(query.Bool.Must))
+		}
+		if len(query.Bool.Should) != 2 {
+			t.Errorf("expected 2 Should clauses, got %d", len(query.Bool.Should))
+		}
+		
+		// Check that Match queries are properly nested
+		mustQuery1 := query.Bool.Must[0]
+		if mustQuery1.Match == nil {
+			t.Error("expected Match query in Must clause")
+		}
+		
+		mustQuery2 := query.Bool.Must[1]
+		if mustQuery2.MatchPhrase == nil {
+			t.Error("expected MatchPhrase query in Must clause")
+		}
+		
+		shouldQuery1 := query.Bool.Should[0]
+		if shouldQuery1.Match == nil {
+			t.Error("expected Match query in Should clause")
+		}
+		
+		shouldQuery2 := query.Bool.Should[1]
+		if shouldQuery2.MatchPhrasePrefix == nil {
+			t.Error("expected MatchPhrasePrefix query in Should clause")
+		}
+	})
+}
+
+func TestMatchCompatibility(t *testing.T) {
+	t.Run("should generate compatible Match query structure", func(t *testing.T) {
+		query, err := NewQuery(Match("title", "elasticsearch search"))
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		
+		// Verify the structure matches what elasticsearch expects
+		if query.Match == nil {
+			t.Error("expected Match query")
+		}
+		
+		matchQuery := query.Match["title"]
+		if matchQuery.Query != "elasticsearch search" {
+			t.Errorf("expected query 'elasticsearch search', got %s", matchQuery.Query)
+		}
+	})
+
+	t.Run("should match manual Match query construction", func(t *testing.T) {
+		// Our builder approach
+		builderQuery, err := NewQuery(Match("title", "elasticsearch"))
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+
+		// Manual construction
+		manualQuery := &types.Query{
+			Match: map[string]types.MatchQuery{
+				"title": {
+					Query: "elasticsearch",
+				},
+			},
+		}
+
+		// Compare structures
+		if builderQuery.Match == nil || manualQuery.Match == nil {
+			t.Error("both queries should have Match queries")
+		}
+		
+		if builderQuery.Match["title"].Query != manualQuery.Match["title"].Query {
+			t.Errorf("Query mismatch: builder=%s, manual=%s", 
+				builderQuery.Match["title"].Query, manualQuery.Match["title"].Query)
+		}
+	})
+}
+
+// Benchmark tests for Match queries
+func BenchmarkMatchQuery(b *testing.B) {
+	b.Run("Simple Match", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			_, _ = NewQuery(Match("title", "elasticsearch search"))
+		}
+	})
+
+	b.Run("Match with Options", func(b *testing.B) {
+		op := operator.And
+		fuzziness := types.Fuzziness("AUTO")
+		for i := 0; i < b.N; i++ {
+			_, _ = NewQuery(
+				MatchWithOptions("title", "elasticsearch search", MatchOptions{
+					Operator:  &op,
+					Fuzziness: fuzziness,
+				}),
+			)
+		}
+	})
+
+	b.Run("Match Phrase", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			_, _ = NewQuery(MatchPhrase("content", "elasticsearch is awesome"))
+		}
+	})
+
+	b.Run("Match Phrase Prefix", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			_, _ = NewQuery(MatchPhrasePrefix("title", "elasticsearch sea"))
+		}
+	})
+
+	b.Run("Complex Match in Bool", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			_, _ = NewQuery(
+				Bool(
+					Must(
+						Match("title", "elasticsearch"),
+						MatchPhrase("content", "search engine"),
+					),
+					Should(
+						Match("tags", "database"),
+						MatchPhrasePrefix("description", "fast sea"),
+					),
+				),
+			)
+		}
+	})
+} 

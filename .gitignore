@@ -23,10 +23,10 @@ profile.cov
 # Go workspace file
 go.work
 go.work.sum
-
+.idea/
 # env file
 .env
-
+go-elasticsearch-8.18/
 # Editor/IDE
 # .idea/
 # .vscode/

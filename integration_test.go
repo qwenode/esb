@@ -9,7 +9,7 @@ import (
 // TestComplexQueryIntegration tests complex query combinations
 func TestComplexQueryIntegration(t *testing.T) {
 	// Test a complex real-world query scenario
-	query, err := NewQuery(
+	query := NewQuery(
 		Bool(
 			Must(
 				Match("title", "elasticsearch"),
@@ -31,11 +31,6 @@ func TestComplexQueryIntegration(t *testing.T) {
 			),
 		),
 	)
-	
-	if err != nil {
-		t.Errorf("Complex query creation failed: %v", err)
-		return
-	}
 	
 	// Validate the structure
 	if query.Bool == nil {
@@ -65,7 +60,7 @@ func TestComplexQueryIntegration(t *testing.T) {
 
 // TestNestedBoolQueryIntegration tests deeply nested Bool queries
 func TestNestedBoolQueryIntegration(t *testing.T) {
-	query, err := NewQuery(
+	query := NewQuery(
 		Bool(
 			Must(
 				Bool(
@@ -86,11 +81,6 @@ func TestNestedBoolQueryIntegration(t *testing.T) {
 			),
 		),
 	)
-	
-	if err != nil {
-		t.Errorf("Nested Bool query creation failed: %v", err)
-		return
-	}
 	
 	// Validate nested structure
 	if query.Bool == nil {
@@ -128,7 +118,7 @@ func TestNestedBoolQueryIntegration(t *testing.T) {
 
 // TestAllQueryTypesIntegration tests all implemented query types together
 func TestAllQueryTypesIntegration(t *testing.T) {
-	query, err := NewQuery(
+	query := NewQuery(
 		Bool(
 			Must(
 				// Match query
@@ -156,11 +146,6 @@ func TestAllQueryTypesIntegration(t *testing.T) {
 			),
 		),
 	)
-	
-	if err != nil {
-		t.Errorf("All query types integration failed: %v", err)
-		return
-	}
 	
 	// Validate the structure
 	if query.Bool == nil {
@@ -222,7 +207,7 @@ func TestAllQueryTypesIntegration(t *testing.T) {
 
 // TestJSONSerializationIntegration tests JSON serialization of complex queries
 func TestJSONSerializationIntegration(t *testing.T) {
-	query, err := NewQuery(
+	query := NewQuery(
 		Bool(
 			Must(
 				Match("title", "elasticsearch"),
@@ -234,11 +219,6 @@ func TestJSONSerializationIntegration(t *testing.T) {
 			),
 		),
 	)
-	
-	if err != nil {
-		t.Errorf("Query creation failed: %v", err)
-		return
-	}
 	
 	// Test JSON serialization
 	jsonData, err := json.Marshal(query)
@@ -355,7 +335,7 @@ func TestElasticsearchClientIntegration(t *testing.T) {
 		Query *types.Query
 	}
 	
-	query, err := NewQuery(
+	query := NewQuery(
 		Bool(
 			Must(
 				Match("title", "elasticsearch"),
@@ -363,11 +343,6 @@ func TestElasticsearchClientIntegration(t *testing.T) {
 			),
 		),
 	)
-	
-	if err != nil {
-		t.Errorf("Query creation failed: %v", err)
-		return
-	}
 	
 	// Test that our query can be used with client interface
 	mockRequest := MockSearchRequest{
@@ -405,7 +380,7 @@ func TestElasticsearchClientIntegration(t *testing.T) {
 // TestMatchOptionsIntegration tests all match query options
 func TestMatchOptionsIntegration(t *testing.T) {
 	// Test all match query options to improve coverage
-	query, err := NewQuery(
+	query := NewQuery(
 		Bool(
 			Must(
 				MatchWithOptions("title", "elasticsearch guide", MatchOptions{
@@ -421,11 +396,6 @@ func TestMatchOptionsIntegration(t *testing.T) {
 			),
 		),
 	)
-	
-	if err != nil {
-		t.Errorf("Match options integration failed: %v", err)
-		return
-	}
 	
 	// Validate the structure
 	if query.Bool == nil {

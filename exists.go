@@ -12,11 +12,9 @@ import (
 //   esb.Exists("user.name")
 //   esb.Exists("metadata.timestamp")
 func Exists(field string) QueryOption {
-	return func(q *types.Query) error {
+	return func(q *types.Query) {
 		q.Exists = &types.ExistsQuery{
 			Field: field,
 		}
-		
-		return nil
 	}
 } 

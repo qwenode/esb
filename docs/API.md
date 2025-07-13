@@ -9,10 +9,10 @@ ESB (Elasticsearch Query Builder) 提供了一套简洁的 API 来构建 Elastic
 ### QueryOption
 
 ```go
-type QueryOption func(*types.Query) error
+type QueryOption func(*types.Query)
 ```
 
-`QueryOption` 是所有查询构建器的基础类型，它是一个函数，接收 `*types.Query` 并返回错误。
+`QueryOption` 是所有查询构建器的基础类型，它是一个函数，接收 `*types.Query` 并直接修改，无返回值。
 
 ### 错误类型
 
@@ -29,7 +29,7 @@ var (
 ### NewQuery
 
 ```go
-func NewQuery(opts ...QueryOption) (*types.Query, error)
+func NewQuery(opts ...QueryOption) *types.Query
 ```
 
 创建新的 Elasticsearch 查询。
@@ -39,11 +39,10 @@ func NewQuery(opts ...QueryOption) (*types.Query, error)
 
 **返回：**
 - `*types.Query`: 兼容 go-elasticsearch 的查询对象
-- `error`: 错误信息
 
 **示例：**
 ```go
-query, err := esb.NewQuery(
+query := esb.NewQuery(
     esb.Term("status", "published"),
 )
 ```
@@ -486,12 +485,12 @@ func boolPtr(b bool) *bool
 
 ```go
 // 单个查询
-query, err := esb.NewQuery(
+query := esb.NewQuery(
     esb.Term("status", "published"),
 )
 
 // 多个查询组合
-query, err := esb.NewQuery(
+query := esb.NewQuery(
     esb.Bool(
         esb.Must(
             esb.Match("title", "elasticsearch"),
@@ -504,7 +503,7 @@ query, err := esb.NewQuery(
 ### 嵌套查询
 
 ```go
-query, err := esb.NewQuery(
+query := esb.NewQuery(
     esb.Bool(
         esb.Must(
             esb.Bool(
@@ -527,7 +526,7 @@ query, err := esb.NewQuery(
 ### 错误处理
 
 ```go
-query, err := esb.NewQuery(
+query := esb.NewQuery(
     esb.Term("status", "published"),
 )
 if err != nil {

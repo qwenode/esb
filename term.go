@@ -10,14 +10,12 @@ import (
 // Example:
 //   esb.Term("status", "published")
 func Term(field, value string) QueryOption {
-	return func(q *types.Query) error {
+	return func(q *types.Query) {
 		q.Term = map[string]types.TermQuery{
 			field: {
 				Value: value,
 			},
 		}
-		
-		return nil
 	}
 }
 
@@ -27,7 +25,7 @@ func Term(field, value string) QueryOption {
 // Example:
 //   esb.Terms("category", "tech", "science", "programming")
 func Terms(field string, values ...string) QueryOption {
-	return func(q *types.Query) error {
+	return func(q *types.Query) {
 		// Convert string values to FieldValue
 		fieldValues := make([]types.FieldValue, len(values))
 		for i, v := range values {
@@ -39,7 +37,5 @@ func Terms(field string, values ...string) QueryOption {
 				field: fieldValues,
 			},
 		}
-		
-		return nil
 	}
 } 

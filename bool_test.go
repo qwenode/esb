@@ -7,11 +7,8 @@ import (
 
 func TestBool(t *testing.T) {
 	t.Run("should create empty Bool query when no options provided", func(t *testing.T) {
-		query, err := NewQuery(Bool())
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		if query == nil {
+		query := NewQuery(Bool())
+		if query.Bool == nil {
 			t.Error("expected non-nil query")
 		}
 		if query.Bool == nil {
@@ -20,17 +17,14 @@ func TestBool(t *testing.T) {
 	})
 
 	t.Run("should create Bool query with Must clause", func(t *testing.T) {
-		query, err := NewQuery(
+		query := NewQuery(
 			Bool(
 				Must(
 					Term("status", "published"),
 				),
 			),
 		)
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		if query == nil {
+		if query.Bool == nil {
 			t.Error("expected non-nil query")
 		}
 		if query.Bool == nil {
@@ -42,7 +36,7 @@ func TestBool(t *testing.T) {
 	})
 
 	t.Run("should create Bool query with multiple Must clauses", func(t *testing.T) {
-		query, err := NewQuery(
+		query := NewQuery(
 			Bool(
 				Must(
 					Term("status", "published"),
@@ -50,9 +44,6 @@ func TestBool(t *testing.T) {
 				),
 			),
 		)
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
 		if query.Bool == nil {
 			t.Error("expected Bool query")
 		}
@@ -62,7 +53,7 @@ func TestBool(t *testing.T) {
 	})
 
 	t.Run("should create Bool query with Should clause", func(t *testing.T) {
-		query, err := NewQuery(
+		query := NewQuery(
 			Bool(
 				Should(
 					Term("title", "elasticsearch"),
@@ -70,9 +61,6 @@ func TestBool(t *testing.T) {
 				),
 			),
 		)
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
 		if query.Bool == nil {
 			t.Error("expected Bool query")
 		}
@@ -82,7 +70,7 @@ func TestBool(t *testing.T) {
 	})
 
 	t.Run("should create Bool query with Filter clause", func(t *testing.T) {
-		query, err := NewQuery(
+		query := NewQuery(
 			Bool(
 				Filter(
 					Term("active", "true"),
@@ -90,9 +78,6 @@ func TestBool(t *testing.T) {
 				),
 			),
 		)
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
 		if query.Bool == nil {
 			t.Error("expected Bool query")
 		}
@@ -102,7 +87,7 @@ func TestBool(t *testing.T) {
 	})
 
 	t.Run("should create Bool query with MustNot clause", func(t *testing.T) {
-		query, err := NewQuery(
+		query := NewQuery(
 			Bool(
 				MustNot(
 					Term("status", "deleted"),
@@ -110,9 +95,6 @@ func TestBool(t *testing.T) {
 				),
 			),
 		)
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
 		if query.Bool == nil {
 			t.Error("expected Bool query")
 		}
@@ -122,7 +104,7 @@ func TestBool(t *testing.T) {
 	})
 
 	t.Run("should create complex Bool query with all clauses", func(t *testing.T) {
-		query, err := NewQuery(
+		query := NewQuery(
 			Bool(
 				Must(
 					Term("status", "published"),
@@ -139,9 +121,6 @@ func TestBool(t *testing.T) {
 				),
 			),
 		)
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
 		if query.Bool == nil {
 			t.Error("expected Bool query")
 		}
@@ -160,7 +139,7 @@ func TestBool(t *testing.T) {
 	})
 
 	t.Run("should handle empty clauses gracefully", func(t *testing.T) {
-		query, err := NewQuery(
+		query := NewQuery(
 			Bool(
 				Must(),     // Empty Must clause
 				Should(),   // Empty Should clause
@@ -168,9 +147,6 @@ func TestBool(t *testing.T) {
 				MustNot(),  // Empty MustNot clause
 			),
 		)
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
 		if query.Bool == nil {
 			t.Error("expected Bool query")
 		}
@@ -190,7 +166,7 @@ func TestBool(t *testing.T) {
 	})
 
 	t.Run("should handle multiple valid options", func(t *testing.T) {
-		query, err := NewQuery(
+		query := NewQuery(
 			Bool(
 				Must(
 					Term("status", "published"),
@@ -198,9 +174,6 @@ func TestBool(t *testing.T) {
 				),
 			),
 		)
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
 		if query.Bool == nil {
 			t.Error("expected Bool query")
 		}
@@ -210,33 +183,13 @@ func TestBool(t *testing.T) {
 	})
 
 	t.Run("should propagate errors from sub-queries", func(t *testing.T) {
-		failingOption := func(q *types.Query) error {
-			return ErrInvalidQuery
-		}
-
-		query, err := NewQuery(
-			Bool(
-				Must(
-					Term("status", "published"),
-					failingOption, // This should cause an error
-				),
-			),
-		)
-		if err == nil {
-			t.Error("expected error from failing sub-query")
-		}
-		if err != ErrInvalidQuery {
-			t.Errorf("expected ErrInvalidQuery, got %v", err)
-		}
-		if query != nil {
-			t.Error("expected nil query when error occurs")
-		}
+		// 已移除 error 相关逻辑，无需测试
 	})
 }
 
 func TestNestedBoolQueries(t *testing.T) {
 	t.Run("should support nested Bool queries", func(t *testing.T) {
-		query, err := NewQuery(
+		query := NewQuery(
 			Bool(
 				Must(
 					Term("status", "published"),
@@ -249,9 +202,6 @@ func TestNestedBoolQueries(t *testing.T) {
 				),
 			),
 		)
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
 		if query.Bool == nil {
 			t.Error("expected Bool query")
 		}
@@ -272,7 +222,7 @@ func TestNestedBoolQueries(t *testing.T) {
 
 func TestBoolQueryCompatibility(t *testing.T) {
 	t.Run("should generate compatible BoolQuery structure", func(t *testing.T) {
-		query, err := NewQuery(
+		query := NewQuery(
 			Bool(
 				Must(
 					Term("status", "published"),
@@ -282,9 +232,6 @@ func TestBoolQueryCompatibility(t *testing.T) {
 				),
 			),
 		)
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
 		
 		// Verify the structure matches what elasticsearch expects
 		if query.Bool == nil {
@@ -312,7 +259,7 @@ func TestBoolQueryCompatibility(t *testing.T) {
 
 	t.Run("should match manual BoolQuery construction", func(t *testing.T) {
 		// Our builder approach
-		builderQuery, err := NewQuery(
+		builderQuery := NewQuery(
 			Bool(
 				Must(
 					Terms("field", "xxx"),
@@ -322,9 +269,6 @@ func TestBoolQueryCompatibility(t *testing.T) {
 				),
 			),
 		)
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
 
 		// Manual construction (like in cmd/main/main.go)
 		manualQuery := &types.Query{

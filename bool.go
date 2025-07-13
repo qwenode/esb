@@ -6,7 +6,7 @@ import (
 
 // BoolOption represents a function that modifies a types.BoolQuery.
 // It is used to build complex boolean queries with Must, Should, Filter, and MustNot clauses.
-type BoolOption func(*types.BoolQuery) error
+type BoolOption func(*types.BoolQuery)
 
 // Bool creates a boolean query with the specified options.
 // Boolean queries are used to combine multiple queries using boolean logic.
@@ -28,17 +28,12 @@ type BoolOption func(*types.BoolQuery) error
 //       ),
 //   )
 func Bool(opts ...BoolOption) QueryOption {
-	return func(q *types.Query) error {
+	return func(q *types.Query) {
 		boolQuery := &types.BoolQuery{}
-		
 		for _, opt := range opts {
-			if err := opt(boolQuery); err != nil {
-				return err
-			}
+			opt(boolQuery)
 		}
-		
 		q.Bool = boolQuery
-		return nil
 	}
 }
 
@@ -51,17 +46,12 @@ func Bool(opts ...BoolOption) QueryOption {
 //       esb.Range("date").Gte("2023-01-01").Build(),
 //   )
 func Must(opts ...QueryOption) BoolOption {
-	return func(bq *types.BoolQuery) error {
+	return func(bq *types.BoolQuery) {
 		for _, opt := range opts {
 			subQuery := &types.Query{}
-			if err := opt(subQuery); err != nil {
-				return err
-			}
-			
+			opt(subQuery)
 			bq.Must = append(bq.Must, *subQuery)
 		}
-		
-		return nil
 	}
 }
 
@@ -75,17 +65,12 @@ func Must(opts ...QueryOption) BoolOption {
 //       esb.Match("content", "search engine"),
 //   )
 func Should(opts ...QueryOption) BoolOption {
-	return func(bq *types.BoolQuery) error {
+	return func(bq *types.BoolQuery) {
 		for _, opt := range opts {
 			subQuery := &types.Query{}
-			if err := opt(subQuery); err != nil {
-				return err
-			}
-			
+			opt(subQuery)
 			bq.Should = append(bq.Should, *subQuery)
 		}
-		
-		return nil
 	}
 }
 
@@ -99,17 +84,12 @@ func Should(opts ...QueryOption) BoolOption {
 //       esb.Range("publish_date").Gte("2023-01-01").Build(),
 //   )
 func Filter(opts ...QueryOption) BoolOption {
-	return func(bq *types.BoolQuery) error {
+	return func(bq *types.BoolQuery) {
 		for _, opt := range opts {
 			subQuery := &types.Query{}
-			if err := opt(subQuery); err != nil {
-				return err
-			}
-			
+			opt(subQuery)
 			bq.Filter = append(bq.Filter, *subQuery)
 		}
-		
-		return nil
 	}
 }
 
@@ -122,16 +102,11 @@ func Filter(opts ...QueryOption) BoolOption {
 //       esb.Term("hidden", true),
 //   )
 func MustNot(opts ...QueryOption) BoolOption {
-	return func(bq *types.BoolQuery) error {
+	return func(bq *types.BoolQuery) {
 		for _, opt := range opts {
 			subQuery := &types.Query{}
-			if err := opt(subQuery); err != nil {
-				return err
-			}
-			
+			opt(subQuery)
 			bq.MustNot = append(bq.MustNot, *subQuery)
 		}
-		
-		return nil
 	}
 } 

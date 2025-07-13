@@ -7,113 +7,46 @@ import (
 
 func TestNewQuery(t *testing.T) {
 	t.Run("should create empty query when no options provided", func(t *testing.T) {
-		query, err := NewQuery()
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
+		query := NewQuery()
 		if query == nil {
 			t.Error("expected non-nil query")
 		}
 	})
 
 	t.Run("should create query with valid option", func(t *testing.T) {
-		query, err := NewQuery(Term("status", "published"))
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
+		query := NewQuery(Term("status", "published"))
 		if query == nil {
 			t.Error("expected non-nil query")
 		}
 	})
 
 	t.Run("should create query with custom option", func(t *testing.T) {
-		validOption := func(q *types.Query) error {
+		validOption := func(q *types.Query) {
 			// Simple option that sets a field (we'll implement actual options later)
-			return nil
 		}
 
-		query, err := NewQuery(validOption)
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
+		query := NewQuery(validOption)
 		if query == nil {
 			t.Error("expected non-nil query")
-		}
-	})
-
-	t.Run("should return error when option fails", func(t *testing.T) {
-		failingOption := func(q *types.Query) error {
-			return ErrInvalidQuery
-		}
-
-		query, err := NewQuery(failingOption)
-		if err == nil {
-			t.Error("expected error when option fails")
-		}
-		if err != ErrInvalidQuery {
-			t.Errorf("expected ErrInvalidQuery, got %v", err)
-		}
-		if query != nil {
-			t.Error("expected nil query when error occurs")
 		}
 	})
 
 	t.Run("should apply multiple options in order", func(t *testing.T) {
 		callOrder := []int{}
 		
-		option1 := func(q *types.Query) error {
+		option1 := func(q *types.Query) {
 			callOrder = append(callOrder, 1)
-			return nil
 		}
 		
-		option2 := func(q *types.Query) error {
+		option2 := func(q *types.Query) {
 			callOrder = append(callOrder, 2)
-			return nil
 		}
 
-		query, err := NewQuery(option1, option2)
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
+		query := NewQuery(option1, option2)
 		if query == nil {
 			t.Error("expected non-nil query")
 		}
 		
-		if len(callOrder) != 2 || callOrder[0] != 1 || callOrder[1] != 2 {
-			t.Errorf("expected call order [1, 2], got %v", callOrder)
-		}
-	})
-
-	t.Run("should stop on first error", func(t *testing.T) {
-		callOrder := []int{}
-		
-		option1 := func(q *types.Query) error {
-			callOrder = append(callOrder, 1)
-			return nil
-		}
-		
-		failingOption := func(q *types.Query) error {
-			callOrder = append(callOrder, 2)
-			return ErrInvalidQuery
-		}
-		
-		option3 := func(q *types.Query) error {
-			callOrder = append(callOrder, 3)
-			return nil
-		}
-
-		query, err := NewQuery(option1, failingOption, option3)
-		if err == nil {
-			t.Error("expected error")
-		}
-		if err != ErrInvalidQuery {
-			t.Errorf("expected ErrInvalidQuery, got %v", err)
-		}
-		if query != nil {
-			t.Error("expected nil query when error occurs")
-		}
-		
-		// Should only call first two options
 		if len(callOrder) != 2 || callOrder[0] != 1 || callOrder[1] != 2 {
 			t.Errorf("expected call order [1, 2], got %v", callOrder)
 		}
@@ -124,23 +57,21 @@ func TestNewQuery(t *testing.T) {
 
 // Benchmark tests to ensure performance is acceptable
 func BenchmarkNewQuery(b *testing.B) {
-	option := func(q *types.Query) error {
-		return nil
-	}
+	option := func(q *types.Query) {}
 	
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		_, _ = NewQuery(option)
+		_ = NewQuery(option)
 	}
 }
 
 func BenchmarkNewQueryMultipleOptions(b *testing.B) {
-	option1 := func(q *types.Query) error { return nil }
-	option2 := func(q *types.Query) error { return nil }
-	option3 := func(q *types.Query) error { return nil }
+	option1 := func(q *types.Query) {}
+	option2 := func(q *types.Query) {}
+	option3 := func(q *types.Query) {}
 	
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		_, _ = NewQuery(option1, option2, option3)
+		_ = NewQuery(option1, option2, option3)
 	}
 } 

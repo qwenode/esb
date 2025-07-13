@@ -7,66 +7,44 @@ import (
 // TestMatchWithOptionsErrorHandling tests error handling in MatchWithOptions
 func TestMatchWithOptionsErrorHandling(t *testing.T) {
 	// Test with empty options
-	query, err := NewQuery(MatchWithOptions("title", "test", MatchOptions{}))
-	if err != nil {
-		t.Errorf("MatchWithOptions with empty options should not error: %v", err)
-	}
+	query := NewQuery(MatchWithOptions("title", "test", MatchOptions{}))
 	if query.Match == nil {
 		t.Error("Match query should not be nil")
 	}
-	
 	// Test with empty field - should work now
 	boost := float32(1.5)
-	_, err = NewQuery(MatchWithOptions("", "test", MatchOptions{
+	_ = NewQuery(MatchWithOptions("", "test", MatchOptions{
 		Boost: &boost,
 	}))
-	if err != nil {
-		t.Errorf("Unexpected error for empty field: %v", err)
-	}
-	
 	// Test with empty value - should work now
-	_, err = NewQuery(MatchWithOptions("title", "", MatchOptions{
+	_ = NewQuery(MatchWithOptions("title", "", MatchOptions{
 		Boost: &boost,
 	}))
-	if err != nil {
-		t.Errorf("Unexpected error for empty value: %v", err)
-	}
 }
 
 // TestMatchPhraseWithOptionsErrorHandling tests error handling in MatchPhraseWithOptions
 func TestMatchPhraseWithOptionsErrorHandling(t *testing.T) {
 	// Test with empty options
-	query, err := NewQuery(MatchPhraseWithOptions("content", "test phrase", MatchPhraseOptions{}))
-	if err != nil {
-		t.Errorf("MatchPhraseWithOptions with empty options should not error: %v", err)
-	}
+	query := NewQuery(MatchPhraseWithOptions("content", "test phrase", MatchPhraseOptions{}))
 	if query.MatchPhrase == nil {
 		t.Error("MatchPhrase query should not be nil")
 	}
-	
 	// Test with slop option
 	slop := 2
-	query, err = NewQuery(MatchPhraseWithOptions("content", "test phrase", MatchPhraseOptions{
+	query = NewQuery(MatchPhraseWithOptions("content", "test phrase", MatchPhraseOptions{
 		Slop: &slop,
 	}))
-	if err != nil {
-		t.Errorf("MatchPhraseWithOptions with slop should not error: %v", err)
-	}
 	if query.MatchPhrase == nil {
 		t.Error("MatchPhrase query should not be nil")
 	}
 	if query.MatchPhrase["content"].Slop == nil || *query.MatchPhrase["content"].Slop != 2 {
 		t.Error("Slop should be set to 2")
 	}
-	
 	// Test with analyzer option
 	analyzer := "standard"
-	query, err = NewQuery(MatchPhraseWithOptions("content", "test phrase", MatchPhraseOptions{
+	query = NewQuery(MatchPhraseWithOptions("content", "test phrase", MatchPhraseOptions{
 		Analyzer: &analyzer,
 	}))
-	if err != nil {
-		t.Errorf("MatchPhraseWithOptions with analyzer should not error: %v", err)
-	}
 	if query.MatchPhrase == nil {
 		t.Error("MatchPhrase query should not be nil")
 	}
@@ -77,10 +55,7 @@ func TestMatchPhraseWithOptionsErrorHandling(t *testing.T) {
 
 // TestMatchPhrasePrefixCoverage tests MatchPhrasePrefix functionality
 func TestMatchPhrasePrefixCoverage(t *testing.T) {
-	query, err := NewQuery(MatchPhrasePrefix("title", "elasticsearch sea"))
-	if err != nil {
-		t.Errorf("MatchPhrasePrefix should not error: %v", err)
-	}
+	query := NewQuery(MatchPhrasePrefix("title", "elasticsearch sea"))
 	if query.MatchPhrasePrefix == nil {
 		t.Error("MatchPhrasePrefix query should not be nil")
 	}

@@ -43,13 +43,14 @@ func main() {
             },
         },
     )
-    query, err := esb.NewQuery(
+    query := esb.NewQuery(
         esb.Bool(
             esb.Filter(
                 esb.Term("field", "aa"),
                 esb.Term("field", "abc"),
             ),
             esb.Filter(esb.NumberRange("create").Gt(11).Build()),
+        
         ),
     )
     marshal, err := json.Marshal(query)

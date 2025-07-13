@@ -37,12 +37,9 @@ import (
 
 func main() {
     // 创建一个简单的 Term 查询
-    query, err := esb.NewQuery(
+    query := esb.NewQuery(
         esb.Term("status", "published"),
     )
-    if err != nil {
-        log.Fatal(err)
-    }
     
     fmt.Printf("Query: %+v\n", query)
 }
@@ -52,7 +49,7 @@ func main() {
 
 ```go
 // 创建复杂的 Bool 查询
-query, err := esb.NewQuery(
+query := esb.NewQuery(
     esb.Bool(
         esb.Must(
             esb.Match("title", "elasticsearch guide"),
@@ -78,7 +75,7 @@ query, err := esb.NewQuery(
 
 ### 核心函数
 
-#### `NewQuery(opts ...QueryOption) (*types.Query, error)`
+#### `NewQuery(opts ...QueryOption) *types.Query`
 
 创建新的 Elasticsearch 查询。
 
@@ -87,7 +84,6 @@ query, err := esb.NewQuery(
 
 **返回：**
 - `*types.Query`: 完全兼容 go-elasticsearch 的查询对象
-- `error`: 错误信息
 
 ### 查询类型
 
@@ -228,7 +224,7 @@ func main() {
     }
     
     // 使用 ESB 构建查询
-    query, err := esb.NewQuery(
+    query := esb.NewQuery(
         esb.Bool(
             esb.Must(
                 esb.Match("title", "elasticsearch"),
@@ -236,9 +232,6 @@ func main() {
             ),
         ),
     )
-    if err != nil {
-        log.Fatal(err)
-    }
     
     // 执行搜索
     res, err := client.Search(
@@ -334,7 +327,7 @@ func buildCMSSearchQuery(searchTerm string, authorID string, dateRange DateRange
 
 ```go
 // ✅ 推荐：使用链式调用
-query, err := esb.NewQuery(
+query := esb.NewQuery(
     esb.Bool(
         esb.Must(
             esb.Match("title", "elasticsearch"),
@@ -344,7 +337,7 @@ query, err := esb.NewQuery(
 )
 
 // ❌ 避免：过度嵌套
-query, err := esb.NewQuery(
+query := esb.NewQuery(
     esb.Bool(
         esb.Must(
             esb.Bool(
@@ -365,15 +358,12 @@ query, err := esb.NewQuery(
 
 ```go
 // ✅ 推荐：及时检查错误
-query, err := esb.NewQuery(
+query := esb.NewQuery(
     esb.Term("status", "published"),
 )
-if err != nil {
-    return fmt.Errorf("failed to build query: %w", err)
-}
 
 // ❌ 避免：忽略错误
-query, _ := esb.NewQuery(
+query := esb.NewQuery(
     esb.Term("status", "published"),
 )
 ```
@@ -422,7 +412,7 @@ func buildUserSearchQuery(name string, ageRange AgeRange, active bool) (*types.Q
 
 // ❌ 避免：在业务逻辑中直接构建复杂查询
 func searchUsers(name string, minAge, maxAge int) {
-    query, err := esb.NewQuery(
+    query := esb.NewQuery(
         esb.Bool(
             esb.Must(
                 esb.Match("name", name),

@@ -12,14 +12,12 @@ import (
 // Example:
 //   esb.Match("title", "elasticsearch search")
 func Match(field, query string) QueryOption {
-    return func(q *types.Query) error {
+    return func(q *types.Query) {
         q.Match = map[string]types.MatchQuery{
             field: {
                 Query: query,
             },
         }
-        
-        return nil
     }
 }
 
@@ -50,7 +48,7 @@ type MatchOptions struct {
 //       MinimumShouldMatch: &types.MinimumShouldMatch("75%"),
 //   })
 func MatchWithOptions(field, query string, options MatchOptions) QueryOption {
-    return func(q *types.Query) error {
+    return func(q *types.Query) {
         matchQuery := types.MatchQuery{
             Query: query,
         }
@@ -99,8 +97,6 @@ func MatchWithOptions(field, query string, options MatchOptions) QueryOption {
         q.Match = map[string]types.MatchQuery{
             field: matchQuery,
         }
-        
-        return nil
     }
 }
 
@@ -110,14 +106,12 @@ func MatchWithOptions(field, query string, options MatchOptions) QueryOption {
 // Example:
 //   esb.MatchPhrase("content", "elasticsearch is awesome")
 func MatchPhrase(field, phrase string) QueryOption {
-    return func(q *types.Query) error {
+    return func(q *types.Query) {
         q.MatchPhrase = map[string]types.MatchPhraseQuery{
             field: {
                 Query: phrase,
             },
         }
-        
-        return nil
     }
 }
 
@@ -136,7 +130,7 @@ type MatchPhraseOptions struct {
 //       Analyzer: &[]string{"standard"}[0],
 //   })
 func MatchPhraseWithOptions(field, phrase string, options MatchPhraseOptions) QueryOption {
-    return func(q *types.Query) error {
+    return func(q *types.Query) {
         matchPhraseQuery := types.MatchPhraseQuery{
             Query: phrase,
         }
@@ -155,8 +149,6 @@ func MatchPhraseWithOptions(field, phrase string, options MatchPhraseOptions) Qu
         q.MatchPhrase = map[string]types.MatchPhraseQuery{
             field: matchPhraseQuery,
         }
-        
-        return nil
     }
 }
 
@@ -166,13 +158,11 @@ func MatchPhraseWithOptions(field, phrase string, options MatchPhraseOptions) Qu
 // Example:
 //   esb.MatchPhrasePrefix("title", "elasticsearch sea")
 func MatchPhrasePrefix(field, prefix string) QueryOption {
-    return func(q *types.Query) error {
+    return func(q *types.Query) {
         q.MatchPhrasePrefix = map[string]types.MatchPhrasePrefixQuery{
             field: {
                 Query: prefix,
             },
         }
-       
-        return nil
     }
 }

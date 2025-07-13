@@ -133,11 +133,10 @@ func (b *NumberRangeBuilder) Relation(relation *rangerelation.RangeRelation) *Nu
 
 // Build creates the QueryOption from the configured numeric range builder.
 func (b *NumberRangeBuilder) Build() QueryOption {
-	return func(q *types.Query) error {
+	return func(q *types.Query) {
 		q.Range = map[string]types.RangeQuery{
 			b.field: b.query,
 		}
-		return nil
 	}
 }
 
@@ -213,11 +212,10 @@ func (b *DateRangeBuilder) Relation(relation *rangerelation.RangeRelation) *Date
 
 // Build creates the QueryOption from the configured date range builder.
 func (b *DateRangeBuilder) Build() QueryOption {
-	return func(q *types.Query) error {
+	return func(q *types.Query) {
 		q.Range = map[string]types.RangeQuery{
 			b.field: b.query,
 		}
-		return nil
 	}
 }
 
@@ -281,10 +279,9 @@ func (b *TermRangeBuilder) Relation(relation *rangerelation.RangeRelation) *Term
 
 // Build creates the QueryOption from the configured term range builder.
 func (b *TermRangeBuilder) Build() QueryOption {
-	return func(q *types.Query) error {
+	return func(q *types.Query) {
 		q.Range = map[string]types.RangeQuery{
 			b.field: b.query,
 		}
-		return nil
 	}
 } 

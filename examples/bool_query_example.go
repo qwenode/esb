@@ -23,7 +23,7 @@ func main() {
 	fmt.Println("1. Simple Bool Query with Must clause:")
 	
 	// Using our builder
-	builderQuery1, err := esb.NewQuery(
+	builderQuery1 := esb.NewQuery(
 		esb.Bool(
 			esb.Must(
 				esb.Term("status", "published"),
@@ -31,9 +31,6 @@ func main() {
 			),
 		),
 	)
-	if err != nil {
-		log.Fatal(err)
-	}
 	
 	// Manual construction (original way)
 	manualQuery1 := &types.Query{
@@ -61,7 +58,7 @@ func main() {
 	fmt.Println("2. Complex Bool Query with Must, Should, Filter, MustNot:")
 	
 	// Using our builder
-	builderQuery2, err := esb.NewQuery(
+	builderQuery2 := esb.NewQuery(
 		esb.Bool(
 			esb.Must(
 				esb.Term("status", "published"),
@@ -79,9 +76,6 @@ func main() {
 			),
 		),
 	)
-	if err != nil {
-		log.Fatal(err)
-	}
 	
 	// Manual construction would be much more verbose...
 	manualQuery2 := &types.Query{
@@ -137,7 +131,7 @@ func main() {
 	fmt.Println("3. Nested Bool Queries:")
 	
 	// Using our builder
-	builderQuery3, err := esb.NewQuery(
+	builderQuery3 := esb.NewQuery(
 		esb.Bool(
 			esb.Must(
 				esb.Term("status", "published"),
@@ -150,9 +144,6 @@ func main() {
 			),
 		),
 	)
-	if err != nil {
-		log.Fatal(err)
-	}
 	
 	fmt.Printf("Nested Bool Query: %+v\n", builderQuery3)
 	fmt.Println()
@@ -161,7 +152,7 @@ func main() {
 	fmt.Println("4. Using with Elasticsearch client:")
 	
 	// Our builder query can be used directly with the client
-	searchQuery, err := esb.NewQuery(
+	searchQuery := esb.NewQuery(
 		esb.Bool(
 			esb.Must(
 				esb.Term("status", "published"),
@@ -171,9 +162,6 @@ func main() {
 			),
 		),
 	)
-	if err != nil {
-		log.Fatal(err)
-	}
 	
 	// This would work with a real Elasticsearch instance
 	response := client.Search().

@@ -8,10 +8,7 @@ import (
 
 func TestMatch(t *testing.T) {
 	t.Run("should create basic match query", func(t *testing.T) {
-		query, err := NewQuery(Match("title", "elasticsearch search"))
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
+		query := NewQuery(Match("title", "elasticsearch search"))
 		if query == nil {
 			t.Error("expected non-nil query")
 		}
@@ -26,7 +23,7 @@ func TestMatch(t *testing.T) {
 
 
 	t.Run("should support multiple match queries in Bool", func(t *testing.T) {
-		query, err := NewQuery(
+		query := NewQuery(
 			Bool(
 				Must(
 					Match("title", "elasticsearch"),
@@ -34,9 +31,6 @@ func TestMatch(t *testing.T) {
 				),
 			),
 		)
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
 		if query.Bool == nil {
 			t.Error("expected Bool query")
 		}
@@ -57,14 +51,11 @@ func TestMatch(t *testing.T) {
 func TestMatchWithOptions(t *testing.T) {
 	t.Run("should create match query with operator", func(t *testing.T) {
 		op := operator.And
-		query, err := NewQuery(
+		query := NewQuery(
 			MatchWithOptions("title", "elasticsearch search", MatchOptions{
 				Operator: &op,
 			}),
 		)
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
 		if query.Match == nil {
 			t.Error("expected Match query")
 		}
@@ -78,14 +69,11 @@ func TestMatchWithOptions(t *testing.T) {
 
 	t.Run("should create match query with fuzziness", func(t *testing.T) {
 		fuzziness := types.Fuzziness("AUTO")
-		query, err := NewQuery(
+		query := NewQuery(
 			MatchWithOptions("title", "elasticsearch", MatchOptions{
 				Fuzziness: fuzziness,
 			}),
 		)
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
 		if query.Match["title"].Fuzziness == nil {
 			t.Error("expected fuzziness to be set")
 		}
@@ -100,7 +88,7 @@ func TestMatchWithOptions(t *testing.T) {
 		boost := float32(1.5)
 		lenient := true
 		
-		query, err := NewQuery(
+		query := NewQuery(
 			MatchWithOptions("title", "elasticsearch search", MatchOptions{
 				Operator: &op,
 				Analyzer: &analyzer,
@@ -108,9 +96,6 @@ func TestMatchWithOptions(t *testing.T) {
 				Lenient:  &lenient,
 			}),
 		)
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
 		
 		matchQuery := query.Match["title"]
 		if matchQuery.Operator == nil || *matchQuery.Operator != operator.And {
@@ -128,12 +113,9 @@ func TestMatchWithOptions(t *testing.T) {
 	})
 
 	t.Run("should work with empty options", func(t *testing.T) {
-		query, err := NewQuery(
+		query := NewQuery(
 			MatchWithOptions("title", "elasticsearch", MatchOptions{}),
 		)
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
 		if query.Match == nil {
 			t.Error("expected Match query")
 		}
@@ -145,10 +127,7 @@ func TestMatchWithOptions(t *testing.T) {
 
 func TestMatchPhrase(t *testing.T) {
 	t.Run("should create match phrase query", func(t *testing.T) {
-		query, err := NewQuery(MatchPhrase("content", "elasticsearch is awesome"))
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
+		query := NewQuery(MatchPhrase("content", "elasticsearch is awesome"))
 		if query == nil {
 			t.Error("expected non-nil query")
 		}
@@ -166,14 +145,11 @@ func TestMatchPhrase(t *testing.T) {
 func TestMatchPhraseWithOptions(t *testing.T) {
 	t.Run("should create match phrase query with slop", func(t *testing.T) {
 		slop := 2
-		query, err := NewQuery(
+		query := NewQuery(
 			MatchPhraseWithOptions("content", "elasticsearch search", MatchPhraseOptions{
 				Slop: &slop,
 			}),
 		)
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
 		if query.MatchPhrase == nil {
 			t.Error("expected MatchPhrase query")
 		}
@@ -189,15 +165,12 @@ func TestMatchPhraseWithOptions(t *testing.T) {
 		analyzer := "keyword"
 		boost := float32(2.0)
 		
-		query, err := NewQuery(
+		query := NewQuery(
 			MatchPhraseWithOptions("content", "exact phrase", MatchPhraseOptions{
 				Analyzer: &analyzer,
 				Boost:    &boost,
 			}),
 		)
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
 		
 		matchPhraseQuery := query.MatchPhrase["content"]
 		if matchPhraseQuery.Analyzer == nil || *matchPhraseQuery.Analyzer != "keyword" {
@@ -211,10 +184,7 @@ func TestMatchPhraseWithOptions(t *testing.T) {
 
 func TestMatchPhrasePrefix(t *testing.T) {
 	t.Run("should create match phrase prefix query", func(t *testing.T) {
-		query, err := NewQuery(MatchPhrasePrefix("title", "elasticsearch sea"))
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
+		query := NewQuery(MatchPhrasePrefix("title", "elasticsearch sea"))
 		if query == nil {
 			t.Error("expected non-nil query")
 		}
@@ -231,7 +201,7 @@ func TestMatchPhrasePrefix(t *testing.T) {
 
 func TestMatchInBoolQuery(t *testing.T) {
 	t.Run("should work with Bool query", func(t *testing.T) {
-		query, err := NewQuery(
+		query := NewQuery(
 			Bool(
 				Must(
 					Match("title", "elasticsearch"),
@@ -243,9 +213,6 @@ func TestMatchInBoolQuery(t *testing.T) {
 				),
 			),
 		)
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
 		if query.Bool == nil {
 			t.Error("expected Bool query")
 		}
@@ -281,10 +248,7 @@ func TestMatchInBoolQuery(t *testing.T) {
 
 func TestMatchCompatibility(t *testing.T) {
 	t.Run("should generate compatible Match query structure", func(t *testing.T) {
-		query, err := NewQuery(Match("title", "elasticsearch search"))
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
+		query := NewQuery(Match("title", "elasticsearch search"))
 		
 		// Verify the structure matches what elasticsearch expects
 		if query.Match == nil {
@@ -299,10 +263,7 @@ func TestMatchCompatibility(t *testing.T) {
 
 	t.Run("should match manual Match query construction", func(t *testing.T) {
 		// Our builder approach
-		builderQuery, err := NewQuery(Match("title", "elasticsearch"))
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
+		builderQuery := NewQuery(Match("title", "elasticsearch"))
 
 		// Manual construction
 		manualQuery := &types.Query{

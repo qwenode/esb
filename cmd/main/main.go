@@ -1,8 +1,10 @@
 package main
 
 import (
+    "encoding/json"
     "github.com/elastic/go-elasticsearch/v8"
     "github.com/elastic/go-elasticsearch/v8/typedapi/types"
+    "github.com/qwenode/esb"
     "log"
 )
 
@@ -41,5 +43,7 @@ func main() {
             },
         },
     )
-    
+    query, err := esb.NewQuery(esb.Bool(esb.Filter(esb.Term("field", "aa"), esb.Term("field", "abc"))))
+    marshal, err := json.Marshal(query)
+    log.Println(string(marshal))
 }

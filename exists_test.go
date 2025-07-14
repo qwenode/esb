@@ -11,27 +11,27 @@ func TestExists(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name:    "valid field name",
+			name:    "有效字段名",
 			field:   "user.name",
 			wantErr: false,
 		},
 		{
-			name:    "simple field name",
+			name:    "简单字段名",
 			field:   "status",
 			wantErr: false,
 		},
 		{
-			name:    "nested field name",
+			name:    "嵌套字段名",
 			field:   "metadata.timestamp",
 			wantErr: false,
 		},
 		{
-			name:    "empty field name",
+			name:    "空字段名",
 			field:   "",
 			wantErr: false,
 		},
 		{
-			name:    "whitespace field name",
+			name:    "空白字段名",
 			field:   "   ",
 			wantErr: false,
 		},
@@ -43,25 +43,25 @@ func TestExists(t *testing.T) {
 			
 			if tt.wantErr {
 				if query.Exists == nil {
-					t.Errorf("Exists() expected error, got nil")
+					t.Errorf("Exists() 预期出错，但得到 nil")
 				}
 				return
 			}
 			
 			if query.Exists == nil {
-				t.Errorf("Exists() query.Exists is nil")
+				t.Errorf("Exists() query.Exists 为 nil")
 				return
 			}
 			
 			if query.Exists.Field != tt.field {
-				t.Errorf("Exists() field = %v, want %v", query.Exists.Field, tt.field)
+				t.Errorf("Exists() 字段 = %v，期望 %v", query.Exists.Field, tt.field)
 			}
 		})
 	}
 }
 
 func TestExistsWithOtherQueries(t *testing.T) {
-	// Test combining Exists with Bool query
+	// 测试将 Exists 与布尔查询组合
 	query := NewQuery(
 		Bool(
 			Must(
@@ -72,35 +72,33 @@ func TestExistsWithOtherQueries(t *testing.T) {
 	)
 	
 	if query.Bool == nil {
-		t.Errorf("Bool query is nil")
+		t.Errorf("布尔查询为 nil")
 		return
 	}
 	
 	if len(query.Bool.Must) != 2 {
-		t.Errorf("Bool.Must length = %d, want 2", len(query.Bool.Must))
+		t.Errorf("Bool.Must 长度 = %d，期望 2", len(query.Bool.Must))
 		return
 	}
 	
-	// Check first Must clause is Exists
+	// 检查第一个 Must 子句是否为 Exists
 	if query.Bool.Must[0].Exists == nil {
-		t.Errorf("First Must clause should be Exists query")
+		t.Errorf("第一个 Must 子句应该是 Exists 查询")
 		return
 	}
 	
 	if query.Bool.Must[0].Exists.Field != "user.name" {
-		t.Errorf("Exists field = %v, want user.name", query.Bool.Must[0].Exists.Field)
+		t.Errorf("Exists 字段 = %v，期望 user.name", query.Bool.Must[0].Exists.Field)
 	}
 	
-	// Check second Must clause is Term
+	// 检查第二个 Must 子句是否为 Term
 	if query.Bool.Must[1].Term == nil {
-		t.Errorf("Second Must clause should be Term query")
+		t.Errorf("第二个 Must 子句应该是 Term 查询")
 		return
 	}
 }
 
-
-
-// Benchmark tests for Exists query
+// Exists 查询的基准测试
 func BenchmarkExists(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		_ = NewQuery(Exists("user.name"))

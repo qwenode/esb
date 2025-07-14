@@ -6,17 +6,17 @@ import (
 )
 
 func TestBool(t *testing.T) {
-	t.Run("should create empty Bool query when no options provided", func(t *testing.T) {
+	t.Run("当没有提供选项时应该创建空的布尔查询", func(t *testing.T) {
 		query := NewQuery(Bool())
 		if query.Bool == nil {
-			t.Error("expected non-nil query")
+			t.Error("预期查询不为 nil")
 		}
 		if query.Bool == nil {
-			t.Error("expected Bool query")
+			t.Error("预期为布尔查询")
 		}
 	})
 
-	t.Run("should create Bool query with Must clause", func(t *testing.T) {
+	t.Run("应该创建带 Must 子句的布尔查询", func(t *testing.T) {
 		query := NewQuery(
 			Bool(
 				Must(
@@ -25,17 +25,17 @@ func TestBool(t *testing.T) {
 			),
 		)
 		if query.Bool == nil {
-			t.Error("expected non-nil query")
+			t.Error("预期查询不为 nil")
 		}
 		if query.Bool == nil {
-			t.Error("expected Bool query")
+			t.Error("预期为布尔查询")
 		}
 		if len(query.Bool.Must) != 1 {
-			t.Errorf("expected 1 Must clause, got %d", len(query.Bool.Must))
+			t.Errorf("预期有 1 个 Must 子句，得到 %d", len(query.Bool.Must))
 		}
 	})
 
-	t.Run("should create Bool query with multiple Must clauses", func(t *testing.T) {
+	t.Run("应该创建带多个 Must 子句的布尔查询", func(t *testing.T) {
 		query := NewQuery(
 			Bool(
 				Must(
@@ -45,14 +45,14 @@ func TestBool(t *testing.T) {
 			),
 		)
 		if query.Bool == nil {
-			t.Error("expected Bool query")
+			t.Error("预期为布尔查询")
 		}
 		if len(query.Bool.Must) != 2 {
-			t.Errorf("expected 2 Must clauses, got %d", len(query.Bool.Must))
+			t.Errorf("预期有 2 个 Must 子句，得到 %d", len(query.Bool.Must))
 		}
 	})
 
-	t.Run("should create Bool query with Should clause", func(t *testing.T) {
+	t.Run("应该创建带 Should 子句的布尔查询", func(t *testing.T) {
 		query := NewQuery(
 			Bool(
 				Should(
@@ -62,14 +62,14 @@ func TestBool(t *testing.T) {
 			),
 		)
 		if query.Bool == nil {
-			t.Error("expected Bool query")
+			t.Error("预期为布尔查询")
 		}
 		if len(query.Bool.Should) != 2 {
-			t.Errorf("expected 2 Should clauses, got %d", len(query.Bool.Should))
+			t.Errorf("预期有 2 个 Should 子句，得到 %d", len(query.Bool.Should))
 		}
 	})
 
-	t.Run("should create Bool query with Filter clause", func(t *testing.T) {
+	t.Run("应该创建带 Filter 子句的布尔查询", func(t *testing.T) {
 		query := NewQuery(
 			Bool(
 				Filter(
@@ -79,14 +79,14 @@ func TestBool(t *testing.T) {
 			),
 		)
 		if query.Bool == nil {
-			t.Error("expected Bool query")
+			t.Error("预期为布尔查询")
 		}
 		if len(query.Bool.Filter) != 2 {
-			t.Errorf("expected 2 Filter clauses, got %d", len(query.Bool.Filter))
+			t.Errorf("预期有 2 个 Filter 子句，得到 %d", len(query.Bool.Filter))
 		}
 	})
 
-	t.Run("should create Bool query with MustNot clause", func(t *testing.T) {
+	t.Run("应该创建带 MustNot 子句的布尔查询", func(t *testing.T) {
 		query := NewQuery(
 			Bool(
 				MustNot(
@@ -96,14 +96,14 @@ func TestBool(t *testing.T) {
 			),
 		)
 		if query.Bool == nil {
-			t.Error("expected Bool query")
+			t.Error("预期为布尔查询")
 		}
 		if len(query.Bool.MustNot) != 2 {
-			t.Errorf("expected 2 MustNot clauses, got %d", len(query.Bool.MustNot))
+			t.Errorf("预期有 2 个 MustNot 子句，得到 %d", len(query.Bool.MustNot))
 		}
 	})
 
-	t.Run("should create complex Bool query with all clauses", func(t *testing.T) {
+	t.Run("应该创建带所有子句的复杂布尔查询", func(t *testing.T) {
 		query := NewQuery(
 			Bool(
 				Must(
@@ -122,50 +122,50 @@ func TestBool(t *testing.T) {
 			),
 		)
 		if query.Bool == nil {
-			t.Error("expected Bool query")
+			t.Error("预期为布尔查询")
 		}
 		if len(query.Bool.Must) != 1 {
-			t.Errorf("expected 1 Must clause, got %d", len(query.Bool.Must))
+			t.Errorf("预期有 1 个 Must 子句，得到 %d", len(query.Bool.Must))
 		}
 		if len(query.Bool.Should) != 2 {
-			t.Errorf("expected 2 Should clauses, got %d", len(query.Bool.Should))
+			t.Errorf("预期有 2 个 Should 子句，得到 %d", len(query.Bool.Should))
 		}
 		if len(query.Bool.Filter) != 1 {
-			t.Errorf("expected 1 Filter clause, got %d", len(query.Bool.Filter))
+			t.Errorf("预期有 1 个 Filter 子句，得到 %d", len(query.Bool.Filter))
 		}
 		if len(query.Bool.MustNot) != 1 {
-			t.Errorf("expected 1 MustNot clause, got %d", len(query.Bool.MustNot))
+			t.Errorf("预期有 1 个 MustNot 子句，得到 %d", len(query.Bool.MustNot))
 		}
 	})
 
-	t.Run("should handle empty clauses gracefully", func(t *testing.T) {
+	t.Run("应该正确处理空子句", func(t *testing.T) {
 		query := NewQuery(
 			Bool(
-				Must(),     // Empty Must clause
-				Should(),   // Empty Should clause
-				Filter(),   // Empty Filter clause
-				MustNot(),  // Empty MustNot clause
+				Must(),     // 空 Must 子句
+				Should(),   // 空 Should 子句
+				Filter(),   // 空 Filter 子句
+				MustNot(),  // 空 MustNot 子句
 			),
 		)
 		if query.Bool == nil {
-			t.Error("expected Bool query")
+			t.Error("预期为布尔查询")
 		}
-		// Empty clauses should result in nil slices
+		// 空子句应该导致 nil 切片
 		if query.Bool.Must != nil && len(query.Bool.Must) > 0 {
-			t.Error("expected empty Must clause")
+			t.Error("预期 Must 子句为空")
 		}
 		if query.Bool.Should != nil && len(query.Bool.Should) > 0 {
-			t.Error("expected empty Should clause")
+			t.Error("预期 Should 子句为空")
 		}
 		if query.Bool.Filter != nil && len(query.Bool.Filter) > 0 {
-			t.Error("expected empty Filter clause")
+			t.Error("预期 Filter 子句为空")
 		}
 		if query.Bool.MustNot != nil && len(query.Bool.MustNot) > 0 {
-			t.Error("expected empty MustNot clause")
+			t.Error("预期 MustNot 子句为空")
 		}
 	})
 
-	t.Run("should handle multiple valid options", func(t *testing.T) {
+	t.Run("应该处理多个有效选项", func(t *testing.T) {
 		query := NewQuery(
 			Bool(
 				Must(
@@ -175,20 +175,20 @@ func TestBool(t *testing.T) {
 			),
 		)
 		if query.Bool == nil {
-			t.Error("expected Bool query")
+			t.Error("预期为布尔查询")
 		}
 		if len(query.Bool.Must) != 2 {
-			t.Errorf("expected 2 Must clauses, got %d", len(query.Bool.Must))
+			t.Errorf("预期有 2 个 Must 子句，得到 %d", len(query.Bool.Must))
 		}
 	})
 
-	t.Run("should propagate errors from sub-queries", func(t *testing.T) {
+	t.Run("应该传播子查询中的错误", func(t *testing.T) {
 		// 已移除 error 相关逻辑，无需测试
 	})
 }
 
 func TestNestedBoolQueries(t *testing.T) {
-	t.Run("should support nested Bool queries", func(t *testing.T) {
+	t.Run("应该支持嵌套布尔查询", func(t *testing.T) {
 		query := NewQuery(
 			Bool(
 				Must(
@@ -203,25 +203,25 @@ func TestNestedBoolQueries(t *testing.T) {
 			),
 		)
 		if query.Bool == nil {
-			t.Error("expected Bool query")
+			t.Error("预期为布尔查询")
 		}
 		if len(query.Bool.Must) != 2 {
-			t.Errorf("expected 2 Must clauses, got %d", len(query.Bool.Must))
+			t.Errorf("预期有 2 个 Must 子句，得到 %d", len(query.Bool.Must))
 		}
 		
-		// Check that the second Must clause is a nested Bool query
+		// 检查第二个 Must 子句是否为嵌套布尔查询
 		nestedQuery := query.Bool.Must[1]
 		if nestedQuery.Bool == nil {
-			t.Error("expected nested Bool query")
+			t.Error("预期为嵌套布尔查询")
 		}
 		if len(nestedQuery.Bool.Should) != 2 {
-			t.Errorf("expected 2 Should clauses in nested query, got %d", len(nestedQuery.Bool.Should))
+			t.Errorf("预期嵌套查询中有 2 个 Should 子句，得到 %d", len(nestedQuery.Bool.Should))
 		}
 	})
 }
 
 func TestBoolQueryCompatibility(t *testing.T) {
-	t.Run("should generate compatible BoolQuery structure", func(t *testing.T) {
+	t.Run("应该生成兼容的布尔查询结构", func(t *testing.T) {
 		query := NewQuery(
 			Bool(
 				Must(
@@ -233,32 +233,32 @@ func TestBoolQueryCompatibility(t *testing.T) {
 			),
 		)
 		
-		// Verify the structure matches what elasticsearch expects
+		// 验证结构是否与 elasticsearch 期望的结构匹配
 		if query.Bool == nil {
-			t.Error("expected Bool query")
+			t.Error("预期为布尔查询")
 		}
 		
-		// Check Must clause
+		// 检查 Must 子句
 		if len(query.Bool.Must) != 1 {
-			t.Errorf("expected 1 Must clause, got %d", len(query.Bool.Must))
+			t.Errorf("预期有 1 个 Must 子句，得到 %d", len(query.Bool.Must))
 		}
 		mustQuery := query.Bool.Must[0]
 		if mustQuery.Term == nil {
-			t.Error("expected Term query in Must clause")
+			t.Error("预期 Must 子句中包含 Term 查询")
 		}
 		
-		// Check Filter clause
+		// 检查 Filter 子句
 		if len(query.Bool.Filter) != 1 {
-			t.Errorf("expected 1 Filter clause, got %d", len(query.Bool.Filter))
+			t.Errorf("预期有 1 个 Filter 子句，得到 %d", len(query.Bool.Filter))
 		}
 		filterQuery := query.Bool.Filter[0]
 		if filterQuery.Term == nil {
-			t.Error("expected Term query in Filter clause")
+			t.Error("预期 Filter 子句中包含 Term 查询")
 		}
 	})
 
-	t.Run("should match manual BoolQuery construction", func(t *testing.T) {
-		// Our builder approach
+	t.Run("应该匹配手动构造的布尔查询", func(t *testing.T) {
+		// 我们的构建器方法
 		builderQuery := NewQuery(
 			Bool(
 				Must(
@@ -270,7 +270,7 @@ func TestBoolQueryCompatibility(t *testing.T) {
 			),
 		)
 
-		// Manual construction (like in cmd/main/main.go)
+		// 手动构造（如同在 cmd/main/main.go 中）
 		manualQuery := &types.Query{
 			Bool: &types.BoolQuery{
 				Must: []types.Query{
@@ -294,26 +294,26 @@ func TestBoolQueryCompatibility(t *testing.T) {
 			},
 		}
 
-		// Compare structures
+		// 比较结构
 		if builderQuery.Bool == nil || manualQuery.Bool == nil {
-			t.Error("both queries should have Bool queries")
+			t.Error("两个查询都应该有布尔查询")
 		}
 		
 		if len(builderQuery.Bool.Must) != len(manualQuery.Bool.Must) {
-			t.Errorf("Must clause count mismatch: builder=%d, manual=%d", 
+			t.Errorf("Must 子句数量不匹配：builder=%d，manual=%d", 
 				len(builderQuery.Bool.Must), len(manualQuery.Bool.Must))
 		}
 		
 		if len(builderQuery.Bool.Filter) != len(manualQuery.Bool.Filter) {
-			t.Errorf("Filter clause count mismatch: builder=%d, manual=%d", 
+			t.Errorf("Filter 子句数量不匹配：builder=%d，manual=%d", 
 				len(builderQuery.Bool.Filter), len(manualQuery.Bool.Filter))
 		}
 	})
 }
 
-// Benchmark tests for Bool queries
+// 布尔查询的基准测试
 func BenchmarkBoolQuery(b *testing.B) {
-	b.Run("Simple Bool with Must", func(b *testing.B) {
+	b.Run("带 Must 的简单布尔查询", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			_ = NewQuery(
 				Bool(
@@ -325,7 +325,7 @@ func BenchmarkBoolQuery(b *testing.B) {
 		}
 	})
 
-	b.Run("Complex Bool with all clauses", func(b *testing.B) {
+	b.Run("带所有子句的复杂布尔查询", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			_ = NewQuery(
 				Bool(
@@ -348,7 +348,7 @@ func BenchmarkBoolQuery(b *testing.B) {
 		}
 	})
 
-	b.Run("Nested Bool queries", func(b *testing.B) {
+	b.Run("嵌套布尔查询", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			_ = NewQuery(
 				Bool(

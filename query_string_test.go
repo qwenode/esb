@@ -14,12 +14,12 @@ func TestQueryString(t *testing.T) {
 		expected string
 	}{
 		{
-			name:     "basic query string",
+			name:     "基本查询字符串",
 			query:    "title:elasticsearch",
 			expected: `{"query_string":{"query":"title:elasticsearch"}}`,
 		},
 		{
-			name:     "complex query string",
+			name:     "复杂查询字符串",
 			query:    "title:elasticsearch AND (tags:search OR tags:database)",
 			expected: `{"query_string":{"query":"title:elasticsearch AND (tags:search OR tags:database)"}}`,
 		},
@@ -27,34 +27,34 @@ func TestQueryString(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Create a new query with the query string option
+			// 使用查询字符串选项创建新查询
 			query := NewQuery(QueryString(tt.query))
 
-			// Convert the query to JSON
+			// 将查询转换为 JSON
 			actualJSON, err := json.Marshal(query)
 			if err != nil {
-				t.Fatalf("Failed to marshal query to JSON: %v", err)
+				t.Fatalf("将查询转换为 JSON 失败：%v", err)
 			}
 
-			// Compare the actual JSON with the expected JSON
+			// 比较实际 JSON 与预期 JSON
 			if string(actualJSON) != tt.expected {
-				t.Errorf("Expected JSON: %s, but got: %s", tt.expected, string(actualJSON))
+				t.Errorf("预期 JSON：%s，但得到：%s", tt.expected, string(actualJSON))
 			}
 
-			// Verify the query can be unmarshaled back into a Query object
+			// 验证查询可以被反序列化回 Query 对象
 			var unmarshaled types.Query
 			if err := json.Unmarshal(actualJSON, &unmarshaled); err != nil {
-				t.Errorf("Failed to unmarshal JSON back to Query: %v", err)
+				t.Errorf("将 JSON 反序列化回 Query 失败：%v", err)
 			}
 
-			// Verify the query string exists in the unmarshaled query
+			// 验证查询字符串在反序列化的查询中存在
 			if unmarshaled.QueryString == nil {
-				t.Error("Expected QueryString to be non-nil in unmarshaled query")
+				t.Error("在反序列化的查询中，预期 QueryString 不为 nil")
 			}
 
-			// Verify the query value
+			// 验证查询值
 			if unmarshaled.QueryString.Query != tt.query {
-				t.Errorf("Expected query %q, got %q", tt.query, unmarshaled.QueryString.Query)
+				t.Errorf("预期查询 %q，得到 %q", tt.query, unmarshaled.QueryString.Query)
 			}
 		})
 	}
@@ -68,7 +68,7 @@ func TestQueryStringWithOptions(t *testing.T) {
 		expected string
 	}{
 		{
-			name:  "query string with default field and operator",
+			name:  "带默认字段和操作符的查询字符串",
 			query: "elasticsearch",
 			setOpts: func(opts *types.QueryStringQuery) {
 				defaultField := "title"
@@ -79,7 +79,7 @@ func TestQueryStringWithOptions(t *testing.T) {
 			expected: `{"query_string":{"default_field":"title","default_operator":"and","query":"elasticsearch"}}`,
 		},
 		{
-			name:  "query string with multiple fields and boost",
+			name:  "带多个字段和权重的查询字符串",
 			query: "search engine",
 			setOpts: func(opts *types.QueryStringQuery) {
 				fields := []string{"title^2", "description"}
@@ -90,7 +90,7 @@ func TestQueryStringWithOptions(t *testing.T) {
 			expected: `{"query_string":{"boost":2,"fields":["title^2","description"],"query":"search engine"}}`,
 		},
 		{
-			name:  "query string with analyzer and allow leading wildcard",
+			name:  "带分析器和允许前导通配符的查询字符串",
 			query: "*search",
 			setOpts: func(opts *types.QueryStringQuery) {
 				analyzer := "standard"
@@ -104,45 +104,45 @@ func TestQueryStringWithOptions(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Create a new query with the query string option
+			// 使用查询字符串选项创建新查询
 			query := NewQuery(QueryStringWithOptions(tt.query, tt.setOpts))
 
-			// Convert the query to JSON
+			// 将查询转换为 JSON
 			actualJSON, err := json.Marshal(query)
 			if err != nil {
-				t.Fatalf("Failed to marshal query to JSON: %v", err)
+				t.Fatalf("将查询转换为 JSON 失败：%v", err)
 			}
 
-			// Compare the actual JSON with the expected JSON
+			// 比较实际 JSON 与预期 JSON
 			if string(actualJSON) != tt.expected {
-				t.Errorf("Expected JSON: %s, but got: %s", tt.expected, string(actualJSON))
+				t.Errorf("预期 JSON：%s，但得到：%s", tt.expected, string(actualJSON))
 			}
 
-			// Verify the query can be unmarshaled back into a Query object
+			// 验证查询可以被反序列化回 Query 对象
 			var unmarshaled types.Query
 			if err := json.Unmarshal(actualJSON, &unmarshaled); err != nil {
-				t.Errorf("Failed to unmarshal JSON back to Query: %v", err)
+				t.Errorf("将 JSON 反序列化回 Query 失败：%v", err)
 			}
 
-			// Verify the query string exists in the unmarshaled query
+			// 验证查询字符串在反序列化的查询中存在
 			if unmarshaled.QueryString == nil {
-				t.Error("Expected QueryString to be non-nil in unmarshaled query")
+				t.Error("在反序列化的查询中，预期 QueryString 不为 nil")
 			}
 
-			// Verify the query value
+			// 验证查询值
 			if unmarshaled.QueryString.Query != tt.query {
-				t.Errorf("Expected query %q, got %q", tt.query, unmarshaled.QueryString.Query)
+				t.Errorf("预期查询 %q，得到 %q", tt.query, unmarshaled.QueryString.Query)
 			}
 		})
 	}
 
-	t.Run("should work with nil callback", func(t *testing.T) {
+	t.Run("应该可以处理空回调", func(t *testing.T) {
 		query := NewQuery(QueryStringWithOptions("elasticsearch", nil))
 		if query.QueryString == nil {
-			t.Error("Expected QueryString to be non-nil")
+			t.Error("预期 QueryString 不为 nil")
 		}
 		if query.QueryString.Query != "elasticsearch" {
-			t.Errorf("Expected query 'elasticsearch', got %s", query.QueryString.Query)
+			t.Errorf("预期查询为 'elasticsearch'，得到 %s", query.QueryString.Query)
 		}
 	})
 } 

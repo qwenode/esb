@@ -6,32 +6,32 @@ import (
 )
 
 func TestNewQuery(t *testing.T) {
-	t.Run("should create empty query when no options provided", func(t *testing.T) {
+	t.Run("当没有提供选项时应该创建空查询", func(t *testing.T) {
 		query := NewQuery()
 		if query == nil {
-			t.Error("expected non-nil query")
+			t.Error("预期查询不为 nil")
 		}
 	})
 
-	t.Run("should create query with valid option", func(t *testing.T) {
+	t.Run("应该使用有效选项创建查询", func(t *testing.T) {
 		query := NewQuery(Term("status", "published"))
 		if query == nil {
-			t.Error("expected non-nil query")
+			t.Error("预期查询不为 nil")
 		}
 	})
 
-	t.Run("should create query with custom option", func(t *testing.T) {
+	t.Run("应该使用自定义选项创建查询", func(t *testing.T) {
 		validOption := func(q *types.Query) {
-			// Simple option that sets a field (we'll implement actual options later)
+			// 简单的选项，设置一个字段（我们稍后会实现实际的选项）
 		}
 
 		query := NewQuery(validOption)
 		if query == nil {
-			t.Error("expected non-nil query")
+			t.Error("预期查询不为 nil")
 		}
 	})
 
-	t.Run("should apply multiple options in order", func(t *testing.T) {
+	t.Run("应该按顺序应用多个选项", func(t *testing.T) {
 		callOrder := []int{}
 		
 		option1 := func(q *types.Query) {
@@ -44,18 +44,16 @@ func TestNewQuery(t *testing.T) {
 
 		query := NewQuery(option1, option2)
 		if query == nil {
-			t.Error("expected non-nil query")
+			t.Error("预期查询不为 nil")
 		}
 		
 		if len(callOrder) != 2 || callOrder[0] != 1 || callOrder[1] != 2 {
-			t.Errorf("expected call order [1, 2], got %v", callOrder)
+			t.Errorf("预期调用顺序为 [1, 2]，得到 %v", callOrder)
 		}
 	})
 }
 
-
-
-// Benchmark tests to ensure performance is acceptable
+// 基准测试以确保性能可接受
 func BenchmarkNewQuery(b *testing.B) {
 	option := func(q *types.Query) {}
 	

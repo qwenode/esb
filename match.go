@@ -90,3 +90,24 @@ func MatchPhrasePrefix(field, prefix string) QueryOption {
         }
     }
 }
+
+// MatchPhrasePrefixWithOptions 提供回调函数式的 MatchPhrasePrefix 查询配置。
+// 示例：
+//   esb.MatchPhrasePrefixWithOptions("title", "elasticsearch sea", func(q *types.MatchPhrasePrefixQuery) {
+//       q.MaxExpansions = &maxExpansions
+//       q.Analyzer = &analyzer
+//       q.Slop = &slop
+//   })
+func MatchPhrasePrefixWithOptions(field, prefix string, setOpts func(opts *types.MatchPhrasePrefixQuery)) QueryOption {
+    return func(q *types.Query) {
+        matchPhrasePrefixQuery := types.MatchPhrasePrefixQuery{
+            Query: prefix,
+        }
+        if setOpts != nil {
+            setOpts(&matchPhrasePrefixQuery)
+        }
+        q.MatchPhrasePrefix = map[string]types.MatchPhrasePrefixQuery{
+            field: matchPhrasePrefixQuery,
+        }
+    }
+}

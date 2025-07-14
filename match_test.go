@@ -5,6 +5,7 @@ import (
 	"github.com/elastic/go-elasticsearch/v8/typedapi/types"
 	"github.com/elastic/go-elasticsearch/v8/typedapi/types/enums/operator"
 	"github.com/elastic/go-elasticsearch/v8/typedapi/types/enums/textquerytype"
+	"github.com/elastic/go-elasticsearch/v8/typedapi/types/enums/zerotermsquery"
 )
 
 func TestMatch(t *testing.T) {
@@ -274,6 +275,54 @@ func TestMatchPhrasePrefix(t *testing.T) {
 	})
 
 
+}
+
+func TestMatchPhrasePrefixWithOptions(t *testing.T) {
+	t.Run("should create match phrase prefix query with callback options", func(t *testing.T) {
+		analyzer := "standard"
+		boost := float32(2.0)
+		slop := 1
+		maxExpansions := 10
+		zeroTermsQueryVal := zerotermsquery.None
+		query := NewQuery(
+			MatchPhrasePrefixWithOptions("title", "quick brown f", func(opts *types.MatchPhrasePrefixQuery) {
+				opts.Analyzer = &analyzer
+				opts.Boost = &boost
+				opts.Slop = &slop
+				opts.MaxExpansions = &maxExpansions
+				opts.ZeroTermsQuery = &zeroTermsQueryVal
+			}),
+		)
+		if query.MatchPhrasePrefix == nil {
+			t.Error("expected MatchPhrasePrefix query")
+		}
+		matchPhrasePrefixQuery := query.MatchPhrasePrefix["title"]
+		if matchPhrasePrefixQuery.Analyzer == nil || *matchPhrasePrefixQuery.Analyzer != "standard" {
+			t.Error("expected analyzer to be 'standard'")
+		}
+		if matchPhrasePrefixQuery.Boost == nil || *matchPhrasePrefixQuery.Boost != 2.0 {
+			t.Error("expected boost to be 2.0")
+		}
+		if matchPhrasePrefixQuery.Slop == nil || *matchPhrasePrefixQuery.Slop != 1 {
+			t.Error("expected slop to be 1")
+		}
+		if matchPhrasePrefixQuery.MaxExpansions == nil || *matchPhrasePrefixQuery.MaxExpansions != 10 {
+			t.Error("expected maxExpansions to be 10")
+		}
+		if matchPhrasePrefixQuery.ZeroTermsQuery == nil || *matchPhrasePrefixQuery.ZeroTermsQuery != zerotermsquery.None {
+			t.Error("expected zeroTermsQuery to be 'none'")
+		}
+	})
+
+	t.Run("should work with nil callback", func(t *testing.T) {
+		query := NewQuery(MatchPhrasePrefixWithOptions("title", "quick brown f", nil))
+		if query.MatchPhrasePrefix == nil {
+			t.Error("expected MatchPhrasePrefix query")
+		}
+		if query.MatchPhrasePrefix["title"].Query != "quick brown f" {
+			t.Errorf("expected query 'quick brown f', got %s", query.MatchPhrasePrefix["title"].Query)
+		}
+	})
 }
 
 func TestMatchInBoolQuery(t *testing.T) {

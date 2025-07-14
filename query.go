@@ -4,19 +4,12 @@
 package esb
 
 import (
-	"errors"
 	"github.com/elastic/go-elasticsearch/v8/typedapi/types"
 )
 
 // QueryOption represents a function that modifies a types.Query.
 // It follows the functional options pattern for building Elasticsearch queries.
 type QueryOption func(*types.Query)
-
-// Common errors returned by the query builder.
-var (
-	ErrInvalidQuery = errors.New("invalid query")
-	ErrNoOptions    = errors.New("no query options provided")
-)
 
 // NewQuery creates a new Elasticsearch query by applying the provided options.
 // It returns a *types.Query that can be used directly with the go-elasticsearch client.

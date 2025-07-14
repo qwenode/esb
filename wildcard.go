@@ -17,62 +17,27 @@ func Wildcard(field, value string) QueryOption {
 	return func(q *types.Query) {
 		q.Wildcard = map[string]types.WildcardQuery{
 			field: {
-				Value: value,
+				Value: &value,
 			},
 		}
 	}
 }
 
-// WildcardOptions 表示通配符查询的高级选项配置。
-type WildcardOptions struct {
-	// Boost 用于提高或降低查询的相关性分数的浮点数。
-	// 相对于默认值 1.0，0-1.0 之间的值会降低分数，大于 1.0 的值会提高分数。
-	Boost *float32
-	
-	// Rewrite 用于重写查询的方法。
-	// 影响查询的执行性能和结果。
-	Rewrite *string
-	
-	// CaseInsensitive 设置是否忽略大小写。
-	// 如果为 true，则匹配时忽略大小写。
-	CaseInsensitive *bool
-	
-	// QueryName 为查询设置名称，用于在结果中标识该查询。
-	QueryName *string
-}
 
-// WildcardWithOptions 创建带有高级选项的通配符查询。
-// 允许对通配符查询进行更精细的控制。
-//
-// 示例：
-//   boost := float32(2.0)
-//   caseInsensitive := true
-//   esb.WildcardWithOptions("title", "java*", esb.WildcardOptions{
-//       Boost: &boost,
-//       CaseInsensitive: &caseInsensitive,
-//   })
-func WildcardWithOptions(field, value string, options WildcardOptions) QueryOption {
-	return func(q *types.Query) {
-		wildcardQuery := types.WildcardQuery{
-			Value: value,
-		}
-		
-		// 应用选项配置
-		if options.Boost != nil {
-			wildcardQuery.Boost = options.Boost
-		}
-		if options.Rewrite != nil {
-			wildcardQuery.Rewrite = options.Rewrite
-		}
-		if options.CaseInsensitive != nil {
-			wildcardQuery.CaseInsensitive = options.CaseInsensitive
-		}
-		if options.QueryName != nil {
-			wildcardQuery.QueryName_ = options.QueryName
-		}
-		
-		q.Wildcard = map[string]types.WildcardQuery{
-			field: wildcardQuery,
-		}
-	}
+
+ 
+
+// WildcardWithOptions 提供回调函数式的 Wildcard 查询配置。
+func WildcardWithOptions(field, value string, setOpts func(opts *types.WildcardQuery)) QueryOption {
+    return func(q *types.Query) {
+        wildcardQuery := types.WildcardQuery{
+            Value: &value,
+        }
+        if setOpts != nil {
+            setOpts(&wildcardQuery)
+        }
+        q.Wildcard = map[string]types.WildcardQuery{
+            field: wildcardQuery,
+        }
+    }
 } 

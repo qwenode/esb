@@ -154,3 +154,179 @@ func TestFuzzyWithOptions(t *testing.T) {
 		}
 	})
 } 
+
+// TestFuzzy 测试Fuzzy查询功能
+func TestFuzzy(t *testing.T) {
+	t.Run("测试基本Fuzzy查询", func(t *testing.T) {
+		query := NewQuery(Fuzzy("username", "john"))
+		
+		if query == nil {
+			t.Fatal("query不应该为nil")
+		}
+		
+		if query.Fuzzy == nil {
+			t.Fatal("Fuzzy查询不应该为nil")
+		}
+		
+		if len(query.Fuzzy) != 1 {
+			t.Errorf("期望Fuzzy查询长度为1, 实际得到: %d", len(query.Fuzzy))
+		}
+		
+		if fuzzyQuery, exists := query.Fuzzy["username"]; !exists {
+			t.Error("期望存在username字段")
+		} else if fuzzyQuery.Value != "john" {
+			t.Errorf("期望Value为'john', 实际得到: %s", fuzzyQuery.Value)
+		}
+	})
+	
+	t.Run("测试空值的Fuzzy查询", func(t *testing.T) {
+		query := NewQuery(Fuzzy("username", ""))
+		
+		if query == nil {
+			t.Fatal("query不应该为nil")
+		}
+		
+		if query.Fuzzy == nil {
+			t.Fatal("Fuzzy查询不应该为nil")
+		}
+		
+		if fuzzyQuery, exists := query.Fuzzy["username"]; !exists {
+			t.Error("期望存在username字段")
+		} else if fuzzyQuery.Value != "" {
+			t.Errorf("期望Value为空字符串, 实际得到: %s", fuzzyQuery.Value)
+		}
+	})
+	
+	t.Run("测试特殊字符的Fuzzy查询", func(t *testing.T) {
+		query := NewQuery(Fuzzy("username", "john.doe@example.com"))
+		
+		if query == nil {
+			t.Fatal("query不应该为nil")
+		}
+		
+		if query.Fuzzy == nil {
+			t.Fatal("Fuzzy查询不应该为nil")
+		}
+		
+		if fuzzyQuery, exists := query.Fuzzy["username"]; !exists {
+			t.Error("期望存在username字段")
+		} else if fuzzyQuery.Value != "john.doe@example.com" {
+			t.Errorf("期望Value为'john.doe@example.com', 实际得到: %s", fuzzyQuery.Value)
+		}
+	})
+	
+	t.Run("测试Unicode字符的Fuzzy查询", func(t *testing.T) {
+		query := NewQuery(Fuzzy("username", "张三"))
+		
+		if query == nil {
+			t.Fatal("query不应该为nil")
+		}
+		
+		if query.Fuzzy == nil {
+			t.Fatal("Fuzzy查询不应该为nil")
+		}
+		
+		if fuzzyQuery, exists := query.Fuzzy["username"]; !exists {
+			t.Error("期望存在username字段")
+		} else if fuzzyQuery.Value != "张三" {
+			t.Errorf("期望Value为'张三', 实际得到: %s", fuzzyQuery.Value)
+		}
+	})
+}
+
+// TestFuzzyWithOptionsComplete 测试FuzzyWithOptions的完整功能
+func TestFuzzyWithOptionsComplete(t *testing.T) {
+	t.Run("测试所有选项的Fuzzy查询", func(t *testing.T) {
+		fuzziness := types.Fuzziness("AUTO")
+		prefixLength := 2
+		maxExpansions := 50
+		transpositions := true
+		rewrite := "constant_score"
+		
+		query := NewQuery(
+			FuzzyWithOptions("username", "john", func(q *types.FuzzyQuery) {
+				q.Fuzziness = fuzziness
+				q.PrefixLength = &prefixLength
+				q.MaxExpansions = &maxExpansions
+				q.Transpositions = &transpositions
+				q.Rewrite = &rewrite
+			}),
+		)
+		
+		if query == nil {
+			t.Fatal("query不应该为nil")
+		}
+		
+		if query.Fuzzy == nil {
+			t.Fatal("Fuzzy查询不应该为nil")
+		}
+		
+		fuzzyQuery, exists := query.Fuzzy["username"]
+		if !exists {
+			t.Fatal("期望存在username字段")
+		}
+		
+		if fuzzyQuery.Fuzziness != "AUTO" {
+			t.Errorf("期望Fuzziness为'AUTO', 实际得到: %s", fuzzyQuery.Fuzziness)
+		}
+		
+		if *fuzzyQuery.PrefixLength != 2 {
+			t.Errorf("期望PrefixLength为2, 实际得到: %d", *fuzzyQuery.PrefixLength)
+		}
+		
+		if *fuzzyQuery.MaxExpansions != 50 {
+			t.Errorf("期望MaxExpansions为50, 实际得到: %d", *fuzzyQuery.MaxExpansions)
+		}
+		
+		if !*fuzzyQuery.Transpositions {
+			t.Error("期望Transpositions为true")
+		}
+		
+		if *fuzzyQuery.Rewrite != "constant_score" {
+			t.Errorf("期望Rewrite为'constant_score', 实际得到: %s", *fuzzyQuery.Rewrite)
+		}
+	})
+	
+	t.Run("测试部分选项的Fuzzy查询", func(t *testing.T) {
+		fuzziness := types.Fuzziness("2")
+		
+		query := NewQuery(
+			FuzzyWithOptions("username", "john", func(q *types.FuzzyQuery) {
+				q.Fuzziness = fuzziness
+			}),
+		)
+		
+		if query == nil {
+			t.Fatal("query不应该为nil")
+		}
+		
+		if query.Fuzzy == nil {
+			t.Fatal("Fuzzy查询不应该为nil")
+		}
+		
+		fuzzyQuery, exists := query.Fuzzy["username"]
+		if !exists {
+			t.Fatal("期望存在username字段")
+		}
+		
+		if fuzzyQuery.Fuzziness != "2" {
+			t.Errorf("期望Fuzziness为'2', 实际得到: %s", fuzzyQuery.Fuzziness)
+		}
+		
+		if fuzzyQuery.PrefixLength != nil {
+			t.Error("期望PrefixLength为nil")
+		}
+		
+		if fuzzyQuery.MaxExpansions != nil {
+			t.Error("期望MaxExpansions为nil")
+		}
+		
+		if fuzzyQuery.Transpositions != nil {
+			t.Error("期望Transpositions为nil")
+		}
+		
+		if fuzzyQuery.Rewrite != nil {
+			t.Error("期望Rewrite为nil")
+		}
+	})
+} 

@@ -4,7 +4,7 @@
 package esb
 
 import (
-	"github.com/elastic/go-elasticsearch/v8/typedapi/types"
+    "github.com/elastic/go-elasticsearch/v8/typedapi/types"
 )
 
 // QueryOption 表示一个修改 types.Query 的函数。
@@ -20,9 +20,9 @@ type QueryOption func(*types.Query)
 //   )
 //   client.Search().Index("articles").Query(query)
 func NewQuery(opts ...QueryOption) *types.Query {
-	query := &types.Query{}
-	for _, opt := range opts {
-		opt(query)
-	}
-	return query
-} 
+    query := &types.Query{}
+    for _, opt := range opts {
+        opt(query)
+    }
+    return query
+}

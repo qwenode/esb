@@ -53,8 +53,8 @@ func TestMatchWithOptions(t *testing.T) {
 	t.Run("should create match query with operator", func(t *testing.T) {
 		op := operator.And
 		query := NewQuery(
-			MatchWithOptions("title", "elasticsearch search", MatchOptions{
-				Operator: &op,
+			MatchWithOptions("title", "elasticsearch search", func(opts *types.MatchQuery) {
+				opts.Operator = &op
 			}),
 		)
 		if query.Match == nil {
@@ -71,8 +71,8 @@ func TestMatchWithOptions(t *testing.T) {
 	t.Run("should create match query with fuzziness", func(t *testing.T) {
 		fuzziness := types.Fuzziness("AUTO")
 		query := NewQuery(
-			MatchWithOptions("title", "elasticsearch", MatchOptions{
-				Fuzziness: fuzziness,
+			MatchWithOptions("title", "elasticsearch", func(opts *types.MatchQuery) {
+				opts.Fuzziness = fuzziness
 			}),
 		)
 		if query.Match["title"].Fuzziness == nil {
@@ -90,11 +90,11 @@ func TestMatchWithOptions(t *testing.T) {
 		lenient := true
 		
 		query := NewQuery(
-			MatchWithOptions("title", "elasticsearch search", MatchOptions{
-				Operator: &op,
-				Analyzer: &analyzer,
-				Boost:    &boost,
-				Lenient:  &lenient,
+			MatchWithOptions("title", "elasticsearch search", func(opts *types.MatchQuery) {
+				opts.Operator = &op
+				opts.Analyzer = &analyzer
+				opts.Boost = &boost
+				opts.Lenient = &lenient
 			}),
 		)
 		
@@ -115,7 +115,7 @@ func TestMatchWithOptions(t *testing.T) {
 
 	t.Run("should work with empty options", func(t *testing.T) {
 		query := NewQuery(
-			MatchWithOptions("title", "elasticsearch", MatchOptions{}),
+			MatchWithOptions("title", "elasticsearch", nil),
 		)
 		if query.Match == nil {
 			t.Error("expected Match query")
@@ -132,7 +132,7 @@ func TestMatchWith(t *testing.T) {
 		boost := float32(1.5)
 		fuzziness := types.Fuzziness("AUTO")
 		query := NewQuery(
-			MatchWith("title", "elasticsearch guide", func(q *types.MatchQuery) {
+			MatchWithOptions("title", "elasticsearch guide", func(q *types.MatchQuery) {
 				q.Fuzziness = fuzziness
 				q.Analyzer = &analyzer
 				q.Boost = &boost
@@ -154,7 +154,7 @@ func TestMatchWith(t *testing.T) {
 	})
 
 	t.Run("should work with nil callback", func(t *testing.T) {
-		query := NewQuery(MatchWith("title", "elasticsearch", nil))
+		query := NewQuery(MatchWithOptions("title", "elasticsearch", nil))
 		if query.Match == nil {
 			t.Error("expected Match query")
 		}
@@ -185,8 +185,8 @@ func TestMatchPhraseWithOptions(t *testing.T) {
 	t.Run("should create match phrase query with slop", func(t *testing.T) {
 		slop := 2
 		query := NewQuery(
-			MatchPhraseWithOptions("content", "elasticsearch search", MatchPhraseOptions{
-				Slop: &slop,
+			MatchPhraseWithOptions("content", "elasticsearch search", func(opts *types.MatchPhraseQuery) {
+				opts.Slop = &slop
 			}),
 		)
 		if query.MatchPhrase == nil {
@@ -205,9 +205,9 @@ func TestMatchPhraseWithOptions(t *testing.T) {
 		boost := float32(2.0)
 		
 		query := NewQuery(
-			MatchPhraseWithOptions("content", "exact phrase", MatchPhraseOptions{
-				Analyzer: &analyzer,
-				Boost:    &boost,
+			MatchPhraseWithOptions("content", "exact phrase", func(opts *types.MatchPhraseQuery) {
+				opts.Analyzer = &analyzer
+				opts.Boost = &boost
 			}),
 		)
 		
@@ -227,7 +227,7 @@ func TestMatchPhraseWith(t *testing.T) {
 		boost := float32(2.0)
 		slop := 2
 		query := NewQuery(
-			MatchPhraseWith("content", "elasticsearch is awesome", func(q *types.MatchPhraseQuery) {
+			MatchPhraseWithOptions("content", "elasticsearch is awesome", func(q *types.MatchPhraseQuery) {
 				q.Slop = &slop
 				q.Analyzer = &analyzer
 				q.Boost = &boost
@@ -249,7 +249,7 @@ func TestMatchPhraseWith(t *testing.T) {
 	})
 
 	t.Run("should work with nil callback", func(t *testing.T) {
-		query := NewQuery(MatchPhraseWith("content", "elasticsearch is awesome", nil))
+		query := NewQuery(MatchPhraseWithOptions("content", "elasticsearch is awesome", nil))
 		if query.MatchPhrase == nil {
 			t.Error("expected MatchPhrase query")
 		}
@@ -369,7 +369,7 @@ func TestMultiMatchWith(t *testing.T) {
 		boost := float32(1.5)
 		typeVal := textquerytype.Bestfields
 		query := NewQuery(
-			MultiMatchWith("elasticsearch", []string{"title", "content"}, func(q *types.MultiMatchQuery) {
+			MultiMatchWithOptions("elasticsearch", []string{"title", "content"}, func(q *types.MultiMatchQuery) {
 				q.Analyzer = &analyzer
 				q.Boost = &boost
 				q.Type = &typeVal
@@ -390,7 +390,7 @@ func TestMultiMatchWith(t *testing.T) {
 	})
 
 	t.Run("should work with nil callback", func(t *testing.T) {
-		query := NewQuery(MultiMatchWith("elasticsearch", []string{"title"}, nil))
+		query := NewQuery(MultiMatchWithOptions("elasticsearch", []string{"title"}, nil))
 		if query.MultiMatch == nil {
 			t.Error("expected MultiMatch query")
 		}
@@ -405,7 +405,7 @@ func TestWildcardWith(t *testing.T) {
 		boost := float32(2.0)
 		caseInsensitive := true
 		query := NewQuery(
-			WildcardWith("username", "john*", func(q *types.WildcardQuery) {
+			WildcardWithOptions("username", "john*", func(q *types.WildcardQuery) {
 				q.Boost = &boost
 				q.CaseInsensitive = &caseInsensitive
 			}),
@@ -426,7 +426,7 @@ func TestWildcardWith(t *testing.T) {
 	})
 
 	t.Run("should work with nil callback", func(t *testing.T) {
-		query := NewQuery(WildcardWith("username", "john*", nil))
+		query := NewQuery(WildcardWithOptions("username", "john*", nil))
 		if query.Wildcard == nil {
 			t.Error("expected Wildcard query")
 		}
@@ -441,7 +441,7 @@ func TestFuzzyWith(t *testing.T) {
 		boost := float32(1.5)
 		fuzziness := types.Fuzziness("AUTO")
 		query := NewQuery(
-			FuzzyWith("username", "john", func(q *types.FuzzyQuery) {
+			FuzzyWithOptions("username", "john", func(q *types.FuzzyQuery) {
 				q.Fuzziness = fuzziness
 				q.Boost = &boost
 			}),
@@ -459,7 +459,7 @@ func TestFuzzyWith(t *testing.T) {
 	})
 
 	t.Run("should work with nil callback", func(t *testing.T) {
-		query := NewQuery(FuzzyWith("username", "john", nil))
+		query := NewQuery(FuzzyWithOptions("username", "john", nil))
 		if query.Fuzzy == nil {
 			t.Error("expected Fuzzy query")
 		}
@@ -474,7 +474,7 @@ func TestPrefixWith(t *testing.T) {
 		boost := float32(1.5)
 		caseInsensitive := true
 		query := NewQuery(
-			PrefixWith("username", "john", func(q *types.PrefixQuery) {
+			PrefixWithOptions("username", "john", func(q *types.PrefixQuery) {
 				q.Boost = &boost
 				q.CaseInsensitive = &caseInsensitive
 			}),
@@ -492,7 +492,7 @@ func TestPrefixWith(t *testing.T) {
 	})
 
 	t.Run("should work with nil callback", func(t *testing.T) {
-		query := NewQuery(PrefixWith("username", "john", nil))
+		query := NewQuery(PrefixWithOptions("username", "john", nil))
 		if query.Prefix == nil {
 			t.Error("expected Prefix query")
 		}
@@ -508,7 +508,7 @@ func TestMatchWithOptionsFunc(t *testing.T) {
 		boost := float32(1.5)
 		fuzziness := types.Fuzziness("AUTO")
 		query := NewQuery(
-			MatchWithOptionsFunc("title", "elasticsearch guide", func(opts *types.MatchQuery) {
+			MatchWithOptions("title", "elasticsearch guide", func(opts *types.MatchQuery) {
 				opts.Fuzziness = fuzziness
 				opts.Analyzer = &analyzer
 				opts.Boost = &boost
@@ -530,7 +530,7 @@ func TestMatchWithOptionsFunc(t *testing.T) {
 	})
 
 	t.Run("should work with nil callback", func(t *testing.T) {
-		query := NewQuery(MatchWithOptionsFunc("title", "elasticsearch", nil))
+		query := NewQuery(MatchWithOptions("title", "elasticsearch", nil))
 		if query.Match == nil {
 			t.Error("expected Match query")
 		}
@@ -546,7 +546,7 @@ func TestMatchPhraseWithOptionsFunc(t *testing.T) {
 		boost := float32(2.0)
 		slop := 2
 		query := NewQuery(
-			MatchPhraseWithOptionsFunc("content", "elasticsearch is awesome", func(opts *types.MatchPhraseQuery) {
+			MatchPhraseWithOptions("content", "elasticsearch is awesome", func(opts *types.MatchPhraseQuery) {
 				opts.Slop = &slop
 				opts.Analyzer = &analyzer
 				opts.Boost = &boost
@@ -568,7 +568,7 @@ func TestMatchPhraseWithOptionsFunc(t *testing.T) {
 	})
 
 	t.Run("should work with nil callback", func(t *testing.T) {
-		query := NewQuery(MatchPhraseWithOptionsFunc("content", "elasticsearch is awesome", nil))
+		query := NewQuery(MatchPhraseWithOptions("content", "elasticsearch is awesome", nil))
 		if query.MatchPhrase == nil {
 			t.Error("expected MatchPhrase query")
 		}
@@ -584,7 +584,7 @@ func TestMultiMatchWithOptionsFunc(t *testing.T) {
 		boost := float32(1.5)
 		typeVal := textquerytype.Bestfields
 		query := NewQuery(
-			MultiMatchWithOptionsFunc("elasticsearch", []string{"title", "content"}, func(opts *types.MultiMatchQuery) {
+			MultiMatchWithOptions("elasticsearch", []string{"title", "content"}, func(opts *types.MultiMatchQuery) {
 				opts.Analyzer = &analyzer
 				opts.Boost = &boost
 				opts.Type = &typeVal
@@ -605,7 +605,7 @@ func TestMultiMatchWithOptionsFunc(t *testing.T) {
 	})
 
 	t.Run("should work with nil callback", func(t *testing.T) {
-		query := NewQuery(MultiMatchWithOptionsFunc("elasticsearch", []string{"title"}, nil))
+		query := NewQuery(MultiMatchWithOptions("elasticsearch", []string{"title"}, nil))
 		if query.MultiMatch == nil {
 			t.Error("expected MultiMatch query")
 		}
@@ -620,7 +620,7 @@ func TestWildcardWithOptionsFunc(t *testing.T) {
 		boost := float32(2.0)
 		caseInsensitive := true
 		query := NewQuery(
-			WildcardWithOptionsFunc("username", "john*", func(opts *types.WildcardQuery) {
+			WildcardWithOptions("username", "john*", func(opts *types.WildcardQuery) {
 				opts.Boost = &boost
 				opts.CaseInsensitive = &caseInsensitive
 			}),
@@ -641,7 +641,7 @@ func TestWildcardWithOptionsFunc(t *testing.T) {
 	})
 
 	t.Run("should work with nil callback", func(t *testing.T) {
-		query := NewQuery(WildcardWithOptionsFunc("username", "john*", nil))
+		query := NewQuery(WildcardWithOptions("username", "john*", nil))
 		if query.Wildcard == nil {
 			t.Error("expected Wildcard query")
 		}
@@ -656,7 +656,7 @@ func TestFuzzyWithOptionsFunc(t *testing.T) {
 		boost := float32(1.5)
 		fuzziness := types.Fuzziness("AUTO")
 		query := NewQuery(
-			FuzzyWithOptionsFunc("username", "john", func(opts *types.FuzzyQuery) {
+			FuzzyWithOptions("username", "john", func(opts *types.FuzzyQuery) {
 				opts.Fuzziness = fuzziness
 				opts.Boost = &boost
 			}),
@@ -674,7 +674,7 @@ func TestFuzzyWithOptionsFunc(t *testing.T) {
 	})
 
 	t.Run("should work with nil callback", func(t *testing.T) {
-		query := NewQuery(FuzzyWithOptionsFunc("username", "john", nil))
+		query := NewQuery(FuzzyWithOptions("username", "john", nil))
 		if query.Fuzzy == nil {
 			t.Error("expected Fuzzy query")
 		}
@@ -689,7 +689,7 @@ func TestPrefixWithOptionsFunc(t *testing.T) {
 		boost := float32(1.5)
 		caseInsensitive := true
 		query := NewQuery(
-			PrefixWithOptionsFunc("username", "john", func(opts *types.PrefixQuery) {
+			PrefixWithOptions("username", "john", func(opts *types.PrefixQuery) {
 				opts.Boost = &boost
 				opts.CaseInsensitive = &caseInsensitive
 			}),
@@ -707,7 +707,7 @@ func TestPrefixWithOptionsFunc(t *testing.T) {
 	})
 
 	t.Run("should work with nil callback", func(t *testing.T) {
-		query := NewQuery(PrefixWithOptionsFunc("username", "john", nil))
+		query := NewQuery(PrefixWithOptions("username", "john", nil))
 		if query.Prefix == nil {
 			t.Error("expected Prefix query")
 		}
@@ -730,9 +730,9 @@ func BenchmarkMatchQuery(b *testing.B) {
 		fuzziness := types.Fuzziness("AUTO")
 		for i := 0; i < b.N; i++ {
 			_ = NewQuery(
-				MatchWithOptions("title", "elasticsearch search", MatchOptions{
-					Operator:  &op,
-					Fuzziness: fuzziness,
+				MatchWithOptions("title", "elasticsearch search", func(opts *types.MatchQuery) {
+					opts.Operator = &op
+					opts.Fuzziness = fuzziness
 				}),
 			)
 		}

@@ -48,6 +48,7 @@ func main() {
             esb.Filter(
                 esb.Term("field", "aa"),
                 esb.Term("field", "abc"),
+            
             ),
             esb.Filter(esb.NumberRange("create").Gt(11).Build()),
         

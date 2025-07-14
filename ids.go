@@ -19,15 +19,7 @@ func IDs(ids ...string) QueryOption {
 	}
 }
 
-// IDsOptions 表示 IDs 查询的高级选项配置。
-type IDsOptions struct {
-	// Boost 用于提高或降低查询的相关性分数的浮点数。
-	// 相对于默认值 1.0，0-1.0 之间的值会降低分数，大于 1.0 的值会提高分数。
-	Boost *float32
-	
-	// QueryName 为查询设置名称，用于在结果中标识该查询。
-	QueryName *string
-}
+
 
 // IDsWithOptions 创建带有高级选项的 IDs 查询。
 // 允许对 IDs 查询进行更精细的控制。
@@ -35,22 +27,19 @@ type IDsOptions struct {
 // 示例：
 //   boost := float32(2.0)
 //   queryName := "user-ids-query"
-//   esb.IDsWithOptions([]string{"1", "2", "3"}, esb.IDsOptions{
-//       Boost: &boost,
-//       QueryName: &queryName,
+//   esb.IDsWithOptions([]string{"1", "2", "3"}, func(opts *types.IdsQuery) {
+//       opts.Boost = &boost
+//       opts.QueryName_ = &queryName
 //   })
-func IDsWithOptions(ids []string, options IDsOptions) QueryOption {
+func IDsWithOptions(ids []string, setOpts func(opts *types.IdsQuery)) QueryOption {
 	return func(q *types.Query) {
 		idsQuery := &types.IdsQuery{
 			Values: ids,
 		}
 		
 		// 应用选项配置
-		if options.Boost != nil {
-			idsQuery.Boost = options.Boost
-		}
-		if options.QueryName != nil {
-			idsQuery.QueryName_ = options.QueryName
+		if setOpts != nil {
+			setOpts(idsQuery)
 		}
 		
 		q.Ids = idsQuery

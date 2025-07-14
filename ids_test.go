@@ -2,6 +2,7 @@ package esb
 
 import (
 	"testing"
+	"github.com/elastic/go-elasticsearch/v8/typedapi/types"
 )
 
 // TestIDs 测试基本的IDs查询功能
@@ -73,9 +74,9 @@ func TestIDsWithOptions(t *testing.T) {
 		queryName := "test-ids-query"
 		
 		query := NewQuery(
-			IDsWithOptions([]string{"1", "2", "3"}, IDsOptions{
-				Boost:     &boost,
-				QueryName: &queryName,
+			IDsWithOptions([]string{"1", "2", "3"}, func(opts *types.IdsQuery) {
+				opts.Boost = &boost
+				opts.QueryName_ = &queryName
 			}),
 		)
 		
@@ -112,7 +113,7 @@ func TestIDsWithOptions(t *testing.T) {
 	
 	t.Run("测试不带选项的IDs查询", func(t *testing.T) {
 		query := NewQuery(
-			IDsWithOptions([]string{"1", "2"}, IDsOptions{}),
+			IDsWithOptions([]string{"1", "2"}, nil),
 		)
 		
 		if query == nil {

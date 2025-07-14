@@ -42,8 +42,8 @@ func MultiMatchWithOptions(query string, fields []string, setOpts func(opts *typ
 //   esb.MultiMatchBestFields("java programming", "title", "content")
 func MultiMatchBestFields(query string, fields ...string) QueryOption {
     return MultiMatchWithOptions(
-        query, fields, MultiMatchOptions{
-            Type: &textquerytype.Bestfields,
+        query, fields, func(opts *types.MultiMatchQuery) {
+            opts.Type = &textquerytype.Bestfields
         },
     )
 }
@@ -55,8 +55,8 @@ func MultiMatchBestFields(query string, fields ...string) QueryOption {
 //   esb.MultiMatchMostFields("java programming", "title", "content", "tags")
 func MultiMatchMostFields(query string, fields ...string) QueryOption {
     return MultiMatchWithOptions(
-        query, fields, MultiMatchOptions{
-            Type: &textquerytype.Mostfields,
+        query, fields, func(opts *types.MultiMatchQuery) {
+            opts.Type = &textquerytype.Mostfields
         },
     )
 }
@@ -68,8 +68,8 @@ func MultiMatchMostFields(query string, fields ...string) QueryOption {
 //   esb.MultiMatchCrossFields("john doe", "first_name", "last_name")
 func MultiMatchCrossFields(query string, fields ...string) QueryOption {
     return MultiMatchWithOptions(
-        query, fields, MultiMatchOptions{
-            Type: &textquerytype.Crossfields,
+        query, fields, func(opts *types.MultiMatchQuery) {
+            opts.Type = &textquerytype.Crossfields
         },
     )
 }
@@ -81,8 +81,8 @@ func MultiMatchCrossFields(query string, fields ...string) QueryOption {
 //   esb.MultiMatchPhrase("elasticsearch guide", "title", "content")
 func MultiMatchPhrase(query string, fields ...string) QueryOption {
     return MultiMatchWithOptions(
-        query, fields, MultiMatchOptions{
-            Type: &textquerytype.Phrase,
+        query, fields, func(opts *types.MultiMatchQuery) {
+            opts.Type = &textquerytype.Phrase
         },
     )
 }
@@ -94,8 +94,8 @@ func MultiMatchPhrase(query string, fields ...string) QueryOption {
 //   esb.MultiMatchPhrasePrefix("elasticsearch sea", "title", "content")
 func MultiMatchPhrasePrefix(query string, fields ...string) QueryOption {
     return MultiMatchWithOptions(
-        query, fields, MultiMatchOptions{
-            Type: &textquerytype.Phraseprefix,
+        query, fields, func(opts *types.MultiMatchQuery) {
+            opts.Type = &textquerytype.Phraseprefix
         },
     )
 }

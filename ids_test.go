@@ -177,3 +177,84 @@ func TestIDsFromSlice(t *testing.T) {
 		}
 	})
 } 
+
+// TestIDsSlice 测试IDsSlice查询功能
+func TestIDsSlice(t *testing.T) {
+	t.Run("测试基本IDsSlice查询", func(t *testing.T) {
+		ids := []string{"1", "2", "3"}
+		query := NewQuery(IDsSlice(ids))
+		
+		if query == nil {
+			t.Fatal("query不应该为nil")
+		}
+		
+		if query.Ids == nil {
+			t.Fatal("Ids查询不应该为nil")
+		}
+		
+		if len(query.Ids.Values) != 3 {
+			t.Errorf("期望Values长度为3, 实际得到: %d", len(query.Ids.Values))
+		}
+		
+		for i, id := range []string{"1", "2", "3"} {
+			if query.Ids.Values[i] != id {
+				t.Errorf("期望Values[%d]为'%s', 实际得到: %s", i, id, query.Ids.Values[i])
+			}
+		}
+	})
+	
+	t.Run("测试单个值的IDsSlice查询", func(t *testing.T) {
+		ids := []string{"1"}
+		query := NewQuery(IDsSlice(ids))
+		
+		if query == nil {
+			t.Fatal("query不应该为nil")
+		}
+		
+		if query.Ids == nil {
+			t.Fatal("Ids查询不应该为nil")
+		}
+		
+		if len(query.Ids.Values) != 1 {
+			t.Errorf("期望Values长度为1, 实际得到: %d", len(query.Ids.Values))
+		}
+		
+		if query.Ids.Values[0] != "1" {
+			t.Errorf("期望Values[0]为'1', 实际得到: %s", query.Ids.Values[0])
+		}
+	})
+	
+	t.Run("测试空切片的IDsSlice查询", func(t *testing.T) {
+		var ids []string
+		query := NewQuery(IDsSlice(ids))
+		
+		if query == nil {
+			t.Fatal("query不应该为nil")
+		}
+		
+		if query.Ids == nil {
+			t.Fatal("Ids查询不应该为nil")
+		}
+		
+		if len(query.Ids.Values) != 0 {
+			t.Errorf("期望Values长度为0, 实际得到: %d", len(query.Ids.Values))
+		}
+	})
+	
+	t.Run("测试nil切片的IDsSlice查询", func(t *testing.T) {
+		var ids []string = nil
+		query := NewQuery(IDsSlice(ids))
+		
+		if query == nil {
+			t.Fatal("query不应该为nil")
+		}
+		
+		if query.Ids == nil {
+			t.Fatal("Ids查询不应该为nil")
+		}
+		
+		if len(query.Ids.Values) != 0 {
+			t.Errorf("期望Values长度为0, 实际得到: %d", len(query.Ids.Values))
+		}
+	})
+} 

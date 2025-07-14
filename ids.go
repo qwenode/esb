@@ -19,6 +19,18 @@ func IDs(ids ...string) QueryOption {
 	}
 }
 
+// IDsSlice 创建一个IDs查询，功能与IDs相同，但接收切片参数而不是可变参数。
+// IDsSlice查询用于匹配具有指定ID的文档。
+//
+// 示例：
+//   esb.IDsSlice([]string{"1", "2", "3"})
+func IDsSlice(ids []string) QueryOption {
+	return func(q *types.Query) {
+		q.Ids = &types.IdsQuery{
+			Values: ids,
+		}
+	}
+}
 
 
 // IDsWithOptions 创建带有高级选项的 IDs 查询。

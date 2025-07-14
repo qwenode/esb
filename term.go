@@ -33,3 +33,18 @@ func Terms(field string, values ...string) QueryOption {
 		}
 	}
 } 
+
+// TermsSlice 创建一个多词项查询，功能与Terms相同，但接收切片参数而不是可变参数。
+// TermsSlice查询用于匹配任意提供的值。
+//
+// 示例：
+//   esb.TermsSlice("category", []string{"tech", "science", "programming"})
+func TermsSlice(field string, values []string) QueryOption {
+	return func(q *types.Query) {
+		q.Terms = &types.TermsQuery{
+			TermsQuery: map[string]types.TermsQueryField{
+				field: values,
+			},
+		}
+	}
+} 

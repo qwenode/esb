@@ -147,3 +147,82 @@ func TestTerms(t *testing.T) {
 		}
 	})
 } 
+
+// TestTermsSlice 测试TermsSlice查询功能
+func TestTermsSlice(t *testing.T) {
+	t.Run("测试基本TermsSlice查询", func(t *testing.T) {
+		values := []string{"tech", "science", "programming"}
+		query := NewQuery(TermsSlice("category", values))
+		
+		if query == nil {
+			t.Fatal("query不应该为nil")
+		}
+		
+		if query.Terms == nil {
+			t.Fatal("Terms查询不应该为nil")
+		}
+		
+		// 验证字段存在
+		_, exists := query.Terms.TermsQuery["category"]
+		if !exists {
+			t.Fatal("应该存在category字段的terms查询")
+		}
+	})
+	
+	t.Run("测试单个值的TermsSlice查询", func(t *testing.T) {
+		values := []string{"active"}
+		query := NewQuery(TermsSlice("status", values))
+		
+		if query == nil {
+			t.Fatal("query不应该为nil")
+		}
+		
+		if query.Terms == nil {
+			t.Fatal("Terms查询不应该为nil")
+		}
+		
+		// 验证字段存在
+		_, exists := query.Terms.TermsQuery["status"]
+		if !exists {
+			t.Fatal("应该存在status字段的terms查询")
+		}
+	})
+	
+	t.Run("测试空切片的TermsSlice查询", func(t *testing.T) {
+		var values []string
+		query := NewQuery(TermsSlice("empty_field", values))
+		
+		if query == nil {
+			t.Fatal("query不应该为nil")
+		}
+		
+		if query.Terms == nil {
+			t.Fatal("Terms查询不应该为nil")
+		}
+		
+		// 验证字段存在
+		_, exists := query.Terms.TermsQuery["empty_field"]
+		if !exists {
+			t.Fatal("应该存在empty_field字段的terms查询")
+		}
+	})
+	
+	t.Run("测试nil切片的TermsSlice查询", func(t *testing.T) {
+		var values []string = nil
+		query := NewQuery(TermsSlice("nil_field", values))
+		
+		if query == nil {
+			t.Fatal("query不应该为nil")
+		}
+		
+		if query.Terms == nil {
+			t.Fatal("Terms查询不应该为nil")
+		}
+		
+		// 验证字段存在
+		_, exists := query.Terms.TermsQuery["nil_field"]
+		if !exists {
+			t.Fatal("应该存在nil_field字段的terms查询")
+		}
+	})
+} 

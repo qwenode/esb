@@ -26,15 +26,9 @@ func Term(field, value string) QueryOption {
 //   esb.Terms("category", "tech", "science", "programming")
 func Terms(field string, values ...string) QueryOption {
 	return func(q *types.Query) {
-		// Convert string values to FieldValue
-		fieldValues := make([]types.FieldValue, len(values))
-		for i, v := range values {
-			fieldValues[i] = types.FieldValue(v)
-		}
-		
 		q.Terms = &types.TermsQuery{
 			TermsQuery: map[string]types.TermsQueryField{
-				field: fieldValues,
+				field: values,
 			},
 		}
 	}

@@ -4,11 +4,11 @@ import (
 	"github.com/elastic/go-elasticsearch/v8/typedapi/types"
 )
 
-// SimpleQueryString creates a simple query string query.
-// This query uses a simpler syntax than the standard query string query.
-// It's more suitable for exposing directly to users as it will never throw syntax errors.
+// SimpleQueryString 创建一个简单查询字符串查询。
+// 此查询使用比标准查询字符串查询更简单的语法。
+// 它更适合直接暴露给用户，因为它永远不会抛出语法错误。
 //
-// Example:
+// 示例：
 //
 //	query := esb.NewQuery(
 //		esb.SimpleQueryString("elasticsearch + search"),
@@ -21,9 +21,9 @@ func SimpleQueryString(query string) QueryOption {
 	}
 }
 
-// SimpleQueryStringWithOptions creates a simple query string query with additional options.
+// SimpleQueryStringWithOptions 创建一个带有附加选项的简单查询字符串查询。
 //
-// Example:
+// 示例：
 //
 //	query := esb.NewQuery(
 //		esb.SimpleQueryStringWithOptions("elasticsearch + search", func(opts *types.SimpleQueryStringQuery) {

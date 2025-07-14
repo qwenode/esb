@@ -4,10 +4,10 @@ import (
 	"github.com/elastic/go-elasticsearch/v8/typedapi/types"
 )
 
-// Term creates a term query that matches documents containing an exact term.
-// Term queries are used for exact matches and are not analyzed.
+// Term 创建一个精确词项查询，用于匹配包含指定词项的文档。
+// Term 查询用于精确匹配且不会对查询词项进行分析。
 //
-// Example:
+// 示例：
 //   esb.Term("status", "published")
 func Term(field, value string) QueryOption {
 	return func(q *types.Query) {
@@ -19,10 +19,10 @@ func Term(field, value string) QueryOption {
 	}
 }
 
-// Terms creates a terms query that matches documents containing one or more exact terms.
-// Terms queries are used for matching any of the provided values.
+// Terms 创建一个多词项查询，用于匹配包含一个或多个精确词项的文档。
+// Terms 查询用于匹配任意提供的值。
 //
-// Example:
+// 示例：
 //   esb.Terms("category", "tech", "science", "programming")
 func Terms(field string, values ...string) QueryOption {
 	return func(q *types.Query) {

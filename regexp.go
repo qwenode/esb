@@ -4,10 +4,10 @@ import (
 	"github.com/elastic/go-elasticsearch/v8/typedapi/types"
 )
 
-// Regexp creates a regexp query.
-// This query allows you to use regular expressions to match field values.
+// Regexp 创建一个正则表达式查询。
+// 此查询允许使用正则表达式来匹配字段值。
 //
-// Example:
+// 示例：
 //
 //	query := esb.NewQuery(
 //		esb.Regexp("username", "j.*n"),
@@ -23,9 +23,9 @@ func Regexp(field string, value string) QueryOption {
 	}
 }
 
-// RegexpWithOptions creates a regexp query with additional options.
+// RegexpWithOptions 创建一个带有附加选项的正则表达式查询。
 //
-// Example:
+// 示例：
 //
 //	query := esb.NewQuery(
 //		esb.RegexpWithOptions("username", "j.*n", func(opts *types.RegexpQuery) {

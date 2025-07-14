@@ -4,10 +4,10 @@ import (
     "github.com/elastic/go-elasticsearch/v8/typedapi/types"
 )
 
-// Match creates a match query for full-text search.
-// Match queries analyze the query text and find documents that match.
+// Match 创建一个用于全文搜索的匹配查询。
+// Match 查询会分析查询文本并查找匹配的文档。
 //
-// Example:
+// 示例：
 //   esb.Match("title", "elasticsearch search")
 func Match(field, query string) QueryOption {
     return func(q *types.Query) {
@@ -40,10 +40,10 @@ func MatchWithOptions(field, query string, setOpts func(opts *types.MatchQuery))
     }
 }
 
-// MatchPhrase creates a match phrase query for exact phrase matching.
-// Match phrase queries find documents containing the exact phrase.
+// MatchPhrase 创建一个用于精确短语匹配的查询。
+// Match phrase 查询会查找包含完整短语的文档。
 //
-// Example:
+// 示例：
 //   esb.MatchPhrase("content", "elasticsearch is awesome")
 func MatchPhrase(field, phrase string) QueryOption {
     return func(q *types.Query) {
@@ -76,10 +76,10 @@ func MatchPhraseWithOptions(field, phrase string, setOpts func(opts *types.Match
     }
 }
 
-// MatchPhrasePrefix creates a match phrase prefix query.
-// This is useful for autocomplete and "search as you type" functionality.
+// MatchPhrasePrefix 创建一个短语前缀匹配查询。
+// 这对于自动补全和"输入即搜索"功能非常有用。
 //
-// Example:
+// 示例：
 //   esb.MatchPhrasePrefix("title", "elasticsearch sea")
 func MatchPhrasePrefix(field, prefix string) QueryOption {
     return func(q *types.Query) {

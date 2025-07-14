@@ -15,13 +15,13 @@ func TestNested(t *testing.T) {
 		expected string
 	}{
 		{
-			name: "basic nested query",
+			name: "基本嵌套查询",
 			path: "comments",
 			query: Match("comments.author", "john"),
 			expected: `{"nested":{"path":"comments","query":{"match":{"comments.author":{"query":"john"}}}}}`,
 		},
 		{
-			name: "nested query with bool query",
+			name: "带布尔查询的嵌套查询",
 			path: "comments",
 			query: Bool(
 				Must(
@@ -35,34 +35,34 @@ func TestNested(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Create a new query with the nested option
+			// 使用嵌套选项创建新查询
 			query := NewQuery(Nested(tt.path, tt.query))
 
-			// Convert the query to JSON
+			// 将查询转换为 JSON
 			actualJSON, err := json.Marshal(query)
 			if err != nil {
-				t.Fatalf("Failed to marshal query to JSON: %v", err)
+				t.Fatalf("将查询转换为 JSON 失败：%v", err)
 			}
 
-			// Compare the actual JSON with the expected JSON
+			// 比较实际 JSON 与预期 JSON
 			if string(actualJSON) != tt.expected {
-				t.Errorf("Expected JSON: %s, but got: %s", tt.expected, string(actualJSON))
+				t.Errorf("预期 JSON：%s，但得到：%s", tt.expected, string(actualJSON))
 			}
 
-			// Verify the query can be unmarshaled back into a Query object
+			// 验证查询可以被反序列化回 Query 对象
 			var unmarshaled types.Query
 			if err := json.Unmarshal(actualJSON, &unmarshaled); err != nil {
-				t.Errorf("Failed to unmarshal JSON back to Query: %v", err)
+				t.Errorf("将 JSON 反序列化回 Query 失败：%v", err)
 			}
 
-			// Verify the nested query exists
+			// 验证嵌套查询存在
 			if unmarshaled.Nested == nil {
-				t.Error("Expected Nested to be non-nil in unmarshaled query")
+				t.Error("在反序列化的查询中，预期 Nested 不为 nil")
 			}
 
-			// Verify the path
+			// 验证路径
 			if unmarshaled.Nested.Path != tt.path {
-				t.Errorf("Expected path %q, got %q", tt.path, unmarshaled.Nested.Path)
+				t.Errorf("预期路径 %q，得到 %q", tt.path, unmarshaled.Nested.Path)
 			}
 		})
 	}
@@ -77,7 +77,7 @@ func TestNestedWithOptions(t *testing.T) {
 		expected string
 	}{
 		{
-			name: "nested query with score mode",
+			name: "带评分模式的嵌套查询",
 			path: "comments",
 			query: Match("comments.author", "john"),
 			setOpts: func(opts *types.NestedQuery) {
@@ -87,7 +87,7 @@ func TestNestedWithOptions(t *testing.T) {
 			expected: `{"nested":{"path":"comments","query":{"match":{"comments.author":{"query":"john"}}},"score_mode":"avg"}}`,
 		},
 		{
-			name: "nested query with ignore unmapped",
+			name: "带忽略未映射的嵌套查询",
 			path: "comments",
 			query: Match("comments.author", "john"),
 			setOpts: func(opts *types.NestedQuery) {
@@ -97,7 +97,7 @@ func TestNestedWithOptions(t *testing.T) {
 			expected: `{"nested":{"ignore_unmapped":true,"path":"comments","query":{"match":{"comments.author":{"query":"john"}}}}}`,
 		},
 		{
-			name: "nested query with all options",
+			name: "带所有选项的嵌套查询",
 			path: "comments",
 			query: Match("comments.author", "john"),
 			setOpts: func(opts *types.NestedQuery) {
@@ -114,45 +114,45 @@ func TestNestedWithOptions(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Create a new query with the nested option
+			// 使用嵌套选项创建新查询
 			query := NewQuery(NestedWithOptions(tt.path, tt.query, tt.setOpts))
 
-			// Convert the query to JSON
+			// 将查询转换为 JSON
 			actualJSON, err := json.Marshal(query)
 			if err != nil {
-				t.Fatalf("Failed to marshal query to JSON: %v", err)
+				t.Fatalf("将查询转换为 JSON 失败：%v", err)
 			}
 
-			// Compare the actual JSON with the expected JSON
+			// 比较实际 JSON 与预期 JSON
 			if string(actualJSON) != tt.expected {
-				t.Errorf("Expected JSON: %s, but got: %s", tt.expected, string(actualJSON))
+				t.Errorf("预期 JSON：%s，但得到：%s", tt.expected, string(actualJSON))
 			}
 
-			// Verify the query can be unmarshaled back into a Query object
+			// 验证查询可以被反序列化回 Query 对象
 			var unmarshaled types.Query
 			if err := json.Unmarshal(actualJSON, &unmarshaled); err != nil {
-				t.Errorf("Failed to unmarshal JSON back to Query: %v", err)
+				t.Errorf("将 JSON 反序列化回 Query 失败：%v", err)
 			}
 
-			// Verify the nested query exists
+			// 验证嵌套查询存在
 			if unmarshaled.Nested == nil {
-				t.Error("Expected Nested to be non-nil in unmarshaled query")
+				t.Error("在反序列化的查询中，预期 Nested 不为 nil")
 			}
 
-			// Verify the path
+			// 验证路径
 			if unmarshaled.Nested.Path != tt.path {
-				t.Errorf("Expected path %q, got %q", tt.path, unmarshaled.Nested.Path)
+				t.Errorf("预期路径 %q，得到 %q", tt.path, unmarshaled.Nested.Path)
 			}
 		})
 	}
 
-	t.Run("should work with nil callback", func(t *testing.T) {
+	t.Run("应该可以处理空回调", func(t *testing.T) {
 		query := NewQuery(NestedWithOptions("comments", Match("comments.author", "john"), nil))
 		if query.Nested == nil {
-			t.Error("Expected Nested to be non-nil")
+			t.Error("预期 Nested 不为 nil")
 		}
 		if query.Nested.Path != "comments" {
-			t.Errorf("Expected path 'comments', got %s", query.Nested.Path)
+			t.Errorf("预期路径为 'comments'，得到 %s", query.Nested.Path)
 		}
 	})
 } 

@@ -4,10 +4,10 @@ import (
 	"github.com/elastic/go-elasticsearch/v8/typedapi/types"
 )
 
-// QueryString creates a query string query.
-// Query string syntax supports the full Lucene query string syntax.
+// QueryString 创建一个查询字符串查询。
+// 查询字符串语法支持完整的 Lucene 查询字符串语法。
 //
-// Example:
+// 示例：
 //
 //	query := esb.NewQuery(
 //		esb.QueryString("title:elasticsearch AND (tags:search OR tags:database)"),
@@ -20,9 +20,9 @@ func QueryString(query string) QueryOption {
 	}
 }
 
-// QueryStringWithOptions creates a query string query with additional options.
+// QueryStringWithOptions 创建一个带有附加选项的查询字符串查询。
 //
-// Example:
+// 示例：
 //
 //	query := esb.NewQuery(
 //		esb.QueryStringWithOptions("title:elasticsearch", func(opts *types.QueryStringQuery) {

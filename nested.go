@@ -1,34 +1,34 @@
 package esb
 
 import (
-	"github.com/elastic/go-elasticsearch/v8/typedapi/types"
+    "github.com/elastic/go-elasticsearch/v8/typedapi/types"
 )
 
-// Nested creates a nested query.
-// This query is used to search nested fields that are arrays of objects.
+// Nested 创建一个嵌套查询。
+// 此查询用于搜索由对象数组组成的嵌套字段。
 //
-// Example:
+// 示例：
 //
 //	query := esb.NewQuery(
-//		esb.Nested("comments", // path to nested field
-//			esb.Match("comments.author", "john"), // query on nested field
+//		esb.Nested("comments", // 嵌套字段的路径
+//			esb.Match("comments.author", "john"), // 对嵌套字段的查询
 //		),
 //	)
 func Nested(path string, query QueryOption) QueryOption {
-	return func(q *types.Query) {
-		nestedQuery := &types.Query{}
-		query(nestedQuery)
-		
-		q.Nested = &types.NestedQuery{
-			Path:  path,
-			Query: nestedQuery,
-		}
-	}
+    return func(q *types.Query) {
+        nestedQuery := &types.Query{}
+        query(nestedQuery)
+        
+        q.Nested = &types.NestedQuery{
+            Path:  path,
+            Query: nestedQuery,
+        }
+    }
 }
 
-// NestedWithOptions creates a nested query with additional options.
+// NestedWithOptions 创建一个带有附加选项的嵌套查询。
 //
-// Example:
+// 示例：
 //
 //	query := esb.NewQuery(
 //		esb.NestedWithOptions("comments",
@@ -42,19 +42,19 @@ func Nested(path string, query QueryOption) QueryOption {
 //		),
 //	)
 func NestedWithOptions(path string, query QueryOption, setOpts func(opts *types.NestedQuery)) QueryOption {
-	return func(q *types.Query) {
-		nestedQuery := &types.Query{}
-		query(nestedQuery)
-		
-		nested := &types.NestedQuery{
-			Path:  path,
-			Query: nestedQuery,
-		}
-		
-		if setOpts != nil {
-			setOpts(nested)
-		}
-		
-		q.Nested = nested
-	}
-} 
+    return func(q *types.Query) {
+        nestedQuery := &types.Query{}
+        query(nestedQuery)
+        
+        nested := &types.NestedQuery{
+            Path:  path,
+            Query: nestedQuery,
+        }
+        
+        if setOpts != nil {
+            setOpts(nested)
+        }
+        
+        q.Nested = nested
+    }
+}

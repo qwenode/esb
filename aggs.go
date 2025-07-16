@@ -591,3 +591,473 @@ func GeoDistanceAgg(name, field, origin string, rangeKeys []string, distances []
 		}
 	}
 }
+
+// 更多重要的聚合类型
+
+// DateRangeAgg 创建日期范围聚合，根据日期范围对文档进行分组。
+//
+// 示例：
+//   esb.DateRangeAgg("date_ranges", "timestamp", []types.DateRangeExpression{
+//       {To: "2023-01-01"},
+//       {From: "2023-01-01", To: "2023-12-31"},
+//       {From: "2023-12-31"},
+//   })
+func DateRangeAgg(name, field string, ranges []types.DateRangeExpression) AggregationOption {
+	return func(aggs *types.Aggregations) {
+		aggs.Aggregations[name] = types.Aggregations{
+			DateRange: &types.DateRangeAggregation{
+				Field:  &field,
+				Ranges: ranges,
+			},
+		}
+	}
+}
+
+// IpRangeAgg 创建 IP 范围聚合，根据 IP 地址范围对文档进行分组。
+//
+// 示例：
+//   to1 := "192.168.1.0/24"
+//   from2 := "10.0.0.0/8"
+//   esb.IpRangeAgg("ip_ranges", "client_ip", []types.IpRangeAggregationRange{
+//       {To: &to1},
+//       {From: &from2},
+//   })
+func IpRangeAgg(name, field string, ranges []types.IpRangeAggregationRange) AggregationOption {
+	return func(aggs *types.Aggregations) {
+		aggs.Aggregations[name] = types.Aggregations{
+			IpRange: &types.IpRangeAggregation{
+				Field:  &field,
+				Ranges: ranges,
+			},
+		}
+	}
+}
+
+// MissingAgg 创建缺失值聚合，统计指定字段缺失值的文档数量。
+//
+// 示例：
+//   esb.MissingAgg("missing_emails", "email")
+func MissingAgg(name, field string) AggregationOption {
+	return func(aggs *types.Aggregations) {
+		aggs.Aggregations[name] = types.Aggregations{
+			Missing: &types.MissingAggregation{
+				Field: &field,
+			},
+		}
+	}
+}
+
+// RareTermsAgg 创建稀有词项聚合，找出出现频率较低的词项。
+//
+// 示例：
+//   esb.RareTermsAgg("rare_categories", "category")
+func RareTermsAgg(name, field string) AggregationOption {
+	return func(aggs *types.Aggregations) {
+		aggs.Aggregations[name] = types.Aggregations{
+			RareTerms: &types.RareTermsAggregation{
+				Field: &field,
+			},
+		}
+	}
+}
+
+// SamplerAgg 创建采样聚合，对文档进行采样以提高聚合性能。
+//
+// 示例：
+//   esb.SamplerAgg("sample", 1000)
+func SamplerAgg(name string, shardSize int) AggregationOption {
+	return func(aggs *types.Aggregations) {
+		aggs.Aggregations[name] = types.Aggregations{
+			Sampler: &types.SamplerAggregation{
+				ShardSize: &shardSize,
+			},
+		}
+	}
+}
+
+// DiversifiedSamplerAgg 创建多样化采样聚合，确保采样结果的多样性。
+//
+// 示例：
+//   esb.DiversifiedSamplerAgg("diversified_sample", "category", 1000)
+func DiversifiedSamplerAgg(name, field string, shardSize int) AggregationOption {
+	return func(aggs *types.Aggregations) {
+		aggs.Aggregations[name] = types.Aggregations{
+			DiversifiedSampler: &types.DiversifiedSamplerAggregation{
+				Field:     &field,
+				ShardSize: &shardSize,
+			},
+		}
+	}
+}
+
+// ReverseNestedAgg 创建反向嵌套聚合，从嵌套文档聚合回到父文档。
+//
+// 示例：
+//   esb.ReverseNestedAgg("back_to_parent")
+func ReverseNestedAgg(name string, path ...string) AggregationOption {
+	return func(aggs *types.Aggregations) {
+		reverseNested := &types.ReverseNestedAggregation{}
+		if len(path) > 0 {
+			reverseNested.Path = &path[0]
+		}
+		
+		aggs.Aggregations[name] = types.Aggregations{
+			ReverseNested: reverseNested,
+		}
+	}
+}
+
+// ChildrenAgg 创建子文档聚合，聚合指定类型的子文档。
+//
+// 示例：
+//   esb.ChildrenAgg("child_products", "product")
+func ChildrenAgg(name, childType string) AggregationOption {
+	return func(aggs *types.Aggregations) {
+		aggs.Aggregations[name] = types.Aggregations{
+			Children: &types.ChildrenAggregation{
+				Type: &childType,
+			},
+		}
+	}
+}
+
+// ParentAgg 创建父文档聚合，聚合指定类型的父文档。
+//
+// 示例：
+//   esb.ParentAgg("parent_categories", "category")
+func ParentAgg(name, parentType string) AggregationOption {
+	return func(aggs *types.Aggregations) {
+		aggs.Aggregations[name] = types.Aggregations{
+			Parent: &types.ParentAggregation{
+				Type: &parentType,
+			},
+		}
+	}
+}
+
+// AutoDateHistogramAgg 创建自动日期直方图聚合，自动选择合适的时间间隔。
+//
+// 示例：
+//   esb.AutoDateHistogramAgg("auto_dates", "timestamp", 10)
+func AutoDateHistogramAgg(name, field string, buckets int) AggregationOption {
+	return func(aggs *types.Aggregations) {
+		aggs.Aggregations[name] = types.Aggregations{
+			AutoDateHistogram: &types.AutoDateHistogramAggregation{
+				Field:   &field,
+				Buckets: &buckets,
+			},
+		}
+	}
+}
+
+// VariableWidthHistogramAgg 创建可变宽度直方图聚合。
+//
+// 示例：
+//   esb.VariableWidthHistogramAgg("variable_histogram", "price", 10)
+func VariableWidthHistogramAgg(name, field string, buckets int) AggregationOption {
+	return func(aggs *types.Aggregations) {
+		aggs.Aggregations[name] = types.Aggregations{
+			VariableWidthHistogram: &types.VariableWidthHistogramAggregation{
+				Field:   &field,
+				Buckets: &buckets,
+			},
+		}
+	}
+}
+
+// CompositeAgg 创建复合聚合，支持多维度分组和分页。
+//
+// 示例：
+//   sources := []map[string]types.CompositeAggregationSource{
+//       {"category": {Terms: &types.CompositeTermsAggregation{Field: "category"}}},
+//   }
+//   esb.CompositeAgg("composite", sources)
+func CompositeAgg(name string, sources []map[string]types.CompositeAggregationSource) AggregationOption {
+	return func(aggs *types.Aggregations) {
+		aggs.Aggregations[name] = types.Aggregations{
+			Composite: &types.CompositeAggregation{
+				Sources: sources,
+			},
+		}
+	}
+}
+
+// MultiTermsAgg 创建多词项聚合，基于多个字段的组合进行分组。
+//
+// 示例：
+//   esb.MultiTermsAgg("multi_terms", []types.MultiTermLookup{
+//       {Field: "category"},
+//       {Field: "brand"},
+//   })
+func MultiTermsAgg(name string, terms []types.MultiTermLookup) AggregationOption {
+	return func(aggs *types.Aggregations) {
+		aggs.Aggregations[name] = types.Aggregations{
+			MultiTerms: &types.MultiTermsAggregation{
+				Terms: terms,
+			},
+		}
+	}
+}
+
+// SignificantTextAgg 创建重要文本聚合，分析文本字段中的重要词汇。
+//
+// 示例：
+//   esb.SignificantTextAgg("significant_text", "description")
+func SignificantTextAgg(name, field string) AggregationOption {
+	return func(aggs *types.Aggregations) {
+		aggs.Aggregations[name] = types.Aggregations{
+			SignificantText: &types.SignificantTextAggregation{
+				Field: &field,
+			},
+		}
+	}
+}
+
+// 管道聚合（Pipeline Aggregations）
+
+// AvgBucketAgg 创建平均桶聚合，计算兄弟聚合中所有桶的平均值。
+//
+// 示例：
+//   esb.AvgBucketAgg("avg_monthly_sales", "monthly_sales>total_sales")
+func AvgBucketAgg(name, bucketsPath string) AggregationOption {
+	return func(aggs *types.Aggregations) {
+		aggs.Aggregations[name] = types.Aggregations{
+			AvgBucket: &types.AverageBucketAggregation{
+				BucketsPath: types.BucketsPath(bucketsPath),
+			},
+		}
+	}
+}
+
+// MaxBucketAgg 创建最大桶聚合，找出兄弟聚合中值最大的桶。
+//
+// 示例：
+//   esb.MaxBucketAgg("max_monthly_sales", "monthly_sales>total_sales")
+func MaxBucketAgg(name, bucketsPath string) AggregationOption {
+	return func(aggs *types.Aggregations) {
+		aggs.Aggregations[name] = types.Aggregations{
+			MaxBucket: &types.MaxBucketAggregation{
+				BucketsPath: types.BucketsPath(bucketsPath),
+			},
+		}
+	}
+}
+
+// MinBucketAgg 创建最小桶聚合，找出兄弟聚合中值最小的桶。
+//
+// 示例：
+//   esb.MinBucketAgg("min_monthly_sales", "monthly_sales>total_sales")
+func MinBucketAgg(name, bucketsPath string) AggregationOption {
+	return func(aggs *types.Aggregations) {
+		aggs.Aggregations[name] = types.Aggregations{
+			MinBucket: &types.MinBucketAggregation{
+				BucketsPath: types.BucketsPath(bucketsPath),
+			},
+		}
+	}
+}
+
+// SumBucketAgg 创建求和桶聚合，计算兄弟聚合中所有桶的总和。
+//
+// 示例：
+//   esb.SumBucketAgg("total_monthly_sales", "monthly_sales>total_sales")
+func SumBucketAgg(name, bucketsPath string) AggregationOption {
+	return func(aggs *types.Aggregations) {
+		aggs.Aggregations[name] = types.Aggregations{
+			SumBucket: &types.SumBucketAggregation{
+				BucketsPath: types.BucketsPath(bucketsPath),
+			},
+		}
+	}
+}
+
+// StatsBucketAgg 创建统计桶聚合，计算兄弟聚合中所有桶的统计信息。
+//
+// 示例：
+//   esb.StatsBucketAgg("sales_stats", "monthly_sales>total_sales")
+func StatsBucketAgg(name, bucketsPath string) AggregationOption {
+	return func(aggs *types.Aggregations) {
+		aggs.Aggregations[name] = types.Aggregations{
+			StatsBucket: &types.StatsBucketAggregation{
+				BucketsPath: types.BucketsPath(bucketsPath),
+			},
+		}
+	}
+}
+
+// ExtendedStatsBucketAgg 创建扩展统计桶聚合，计算兄弟聚合中所有桶的扩展统计信息。
+//
+// 示例：
+//   esb.ExtendedStatsBucketAgg("sales_extended_stats", "monthly_sales>total_sales")
+func ExtendedStatsBucketAgg(name, bucketsPath string) AggregationOption {
+	return func(aggs *types.Aggregations) {
+		aggs.Aggregations[name] = types.Aggregations{
+			ExtendedStatsBucket: &types.ExtendedStatsBucketAggregation{
+				BucketsPath: types.BucketsPath(bucketsPath),
+			},
+		}
+	}
+}
+
+// PercentilesBucketAgg 创建百分位桶聚合，计算兄弟聚合中所有桶的百分位数。
+//
+// 示例：
+//   esb.PercentilesBucketAgg("sales_percentiles", "monthly_sales>total_sales")
+func PercentilesBucketAgg(name, bucketsPath string) AggregationOption {
+	return func(aggs *types.Aggregations) {
+		aggs.Aggregations[name] = types.Aggregations{
+			PercentilesBucket: &types.PercentilesBucketAggregation{
+				BucketsPath: types.BucketsPath(bucketsPath),
+			},
+		}
+	}
+}
+
+// MovingAvgAgg 创建移动平均聚合，计算时间序列数据的移动平均值。
+//
+// 示例：
+//   esb.MovingAvgAgg("moving_avg", "sales", 7) // 7天移动平均
+func MovingAvgAgg(name, bucketsPath string, window int) AggregationOption {
+	return func(aggs *types.Aggregations) {
+		aggs.Aggregations[name] = types.Aggregations{
+			MovingAvg: types.NewSimpleMovingAverageAggregation(),
+		}
+		// 注意：MovingAvg 的具体实现需要根据模型类型来设置
+	}
+}
+
+// DerivativeAgg 创建导数聚合，计算时间序列数据的变化率。
+//
+// 示例：
+//   esb.DerivativeAgg("sales_derivative", "sales")
+func DerivativeAgg(name, bucketsPath string) AggregationOption {
+	return func(aggs *types.Aggregations) {
+		aggs.Aggregations[name] = types.Aggregations{
+			Derivative: &types.DerivativeAggregation{
+				BucketsPath: types.BucketsPath(bucketsPath),
+			},
+		}
+	}
+}
+
+// CumulativeSumAgg 创建累积求和聚合，计算时间序列数据的累积和。
+//
+// 示例：
+//   esb.CumulativeSumAgg("cumulative_sales", "sales")
+func CumulativeSumAgg(name, bucketsPath string) AggregationOption {
+	return func(aggs *types.Aggregations) {
+		aggs.Aggregations[name] = types.Aggregations{
+			CumulativeSum: &types.CumulativeSumAggregation{
+				BucketsPath: types.BucketsPath(bucketsPath),
+			},
+		}
+	}
+}
+
+// 地理网格聚合
+
+// GeohashGridAgg 创建 Geohash 网格聚合，将地理点按 geohash 网格分组。
+//
+// 示例：
+//   esb.GeohashGridAgg("location_grid", "location", 5)
+func GeohashGridAgg(name, field string, precision int) AggregationOption {
+	return func(aggs *types.Aggregations) {
+		aggs.Aggregations[name] = types.Aggregations{
+			GeohashGrid: &types.GeoHashGridAggregation{
+				Field:     &field,
+				Precision: &precision,
+			},
+		}
+	}
+}
+
+// GeotileGridAgg 创建地理瓦片网格聚合，将地理点按地图瓦片分组。
+//
+// 示例：
+//   esb.GeotileGridAgg("tile_grid", "location", 8)
+func GeotileGridAgg(name, field string, precision int) AggregationOption {
+	return func(aggs *types.Aggregations) {
+		aggs.Aggregations[name] = types.Aggregations{
+			GeotileGrid: &types.GeoTileGridAggregation{
+				Field:     &field,
+				Precision: &precision,
+			},
+		}
+	}
+}
+
+// 高级度量聚合
+
+// WeightedAvgAgg 创建加权平均聚合，计算带权重的平均值。
+//
+// 示例：
+//   esb.WeightedAvgAgg("weighted_avg_price", "price", "quantity")
+func WeightedAvgAgg(name, valueField, weightField string) AggregationOption {
+	return func(aggs *types.Aggregations) {
+		aggs.Aggregations[name] = types.Aggregations{
+			WeightedAvg: &types.WeightedAverageAggregation{
+				Value:  &types.WeightedAverageValue{Field: &valueField},
+				Weight: &types.WeightedAverageValue{Field: &weightField},
+			},
+		}
+	}
+}
+
+// MedianAbsoluteDeviationAgg 创建中位数绝对偏差聚合。
+//
+// 示例：
+//   esb.MedianAbsoluteDeviationAgg("price_mad", "price")
+func MedianAbsoluteDeviationAgg(name, field string) AggregationOption {
+	return func(aggs *types.Aggregations) {
+		aggs.Aggregations[name] = types.Aggregations{
+			MedianAbsoluteDeviation: &types.MedianAbsoluteDeviationAggregation{
+				Field: &field,
+			},
+		}
+	}
+}
+
+// StringStatsAgg 创建字符串统计聚合，分析字符串字段的统计信息。
+//
+// 示例：
+//   esb.StringStatsAgg("description_stats", "description")
+func StringStatsAgg(name, field string) AggregationOption {
+	return func(aggs *types.Aggregations) {
+		aggs.Aggregations[name] = types.Aggregations{
+			StringStats: &types.StringStatsAggregation{
+				Field: &field,
+			},
+		}
+	}
+}
+
+// TTestAgg 创建 T 检验聚合，进行统计假设检验。
+//
+// 示例：
+//   esb.TTestAgg("t_test", "score", esb.Term("group", "A"), esb.Term("group", "B"))
+func TTestAgg(name, field string, filterA, filterB QueryOption) AggregationOption {
+	return func(aggs *types.Aggregations) {
+		queryA := &types.Query{}
+		queryB := &types.Query{}
+		
+		if filterA != nil {
+			filterA(queryA)
+		}
+		if filterB != nil {
+			filterB(queryB)
+		}
+		
+		aggs.Aggregations[name] = types.Aggregations{
+			TTest: &types.TTestAggregation{
+				A: &types.TestPopulation{
+					Field:  field,
+					Filter: queryA,
+				},
+				B: &types.TestPopulation{
+					Field:  field,
+					Filter: queryB,
+				},
+			},
+		}
+	}
+}

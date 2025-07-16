@@ -968,8 +968,11 @@ func TestGeoDistanceAgg(t *testing.T) {
 		if *geoDistanceAgg.GeoDistance.Field != "location" {
 			t.Errorf("Expected field to be 'location', got '%s'", *geoDistanceAgg.GeoDistance.Field)
 		}
-		if geoDistanceAgg.GeoDistance.Origin != "40.7128,-74.0060" {
-			t.Errorf("Expected origin to be '40.7128,-74.0060', got '%s'", geoDistanceAgg.GeoDistance.Origin)
+		if geoDistanceAgg.GeoDistance.Origin == nil {
+			t.Fatal("Expected GeoDistance origin to not be nil")
+		}
+		if originStr, ok := geoDistanceAgg.GeoDistance.Origin.(string); !ok || originStr != "40.7128,-74.0060" {
+			t.Errorf("Expected origin to be '40.7128,-74.0060', got '%v'", geoDistanceAgg.GeoDistance.Origin)
 		}
 		if len(geoDistanceAgg.GeoDistance.Ranges) != 4 {
 			t.Errorf("Expected 4 ranges, got %d", len(geoDistanceAgg.GeoDistance.Ranges))
@@ -1088,3 +1091,556 @@ func TestComplexAggregationCombinations(t *testing.T) {
 		}
 	})
 }
+
+// 测试新增的聚合类型
+
+func TestDateRangeAgg(t *testing.T) {
+	t.Run("basic date range aggregation", func(t *testing.T) {
+		ranges := []types.DateRangeExpression{
+			{To: "2023-01-01"},
+			{From: "2023-01-01", To: "2023-12-31"},
+			{From: "2023-12-31"},
+		}
+		
+		aggs := NewAggregations(
+			DateRangeAgg("date_ranges", "timestamp", ranges),
+		)
+		
+		dateRangeAgg := aggs.Aggregations["date_ranges"]
+		if dateRangeAgg.DateRange == nil {
+			t.Fatal("Expected DateRange aggregation to not be nil")
+		}
+		if dateRangeAgg.DateRange.Field == nil {
+			t.Fatal("Expected DateRange field to not be nil")
+		}
+		if *dateRangeAgg.DateRange.Field != "timestamp" {
+			t.Errorf("Expected field to be 'timestamp', got '%s'", *dateRangeAgg.DateRange.Field)
+		}
+		if len(dateRangeAgg.DateRange.Ranges) != 3 {
+			t.Errorf("Expected 3 ranges, got %d", len(dateRangeAgg.DateRange.Ranges))
+		}
+	})
+}
+
+func TestIpRangeAgg(t *testing.T) {
+	t.Run("basic ip range aggregation", func(t *testing.T) {
+		to1 := "192.168.1.0/24"
+		from2 := "10.0.0.0/8"
+		ranges := []types.IpRangeAggregationRange{
+			{To: &to1},
+			{From: &from2},
+		}
+		
+		aggs := NewAggregations(
+			IpRangeAgg("ip_ranges", "client_ip", ranges),
+		)
+		
+		ipRangeAgg := aggs.Aggregations["ip_ranges"]
+		if ipRangeAgg.IpRange == nil {
+			t.Fatal("Expected IpRange aggregation to not be nil")
+		}
+		if ipRangeAgg.IpRange.Field == nil {
+			t.Fatal("Expected IpRange field to not be nil")
+		}
+		if *ipRangeAgg.IpRange.Field != "client_ip" {
+			t.Errorf("Expected field to be 'client_ip', got '%s'", *ipRangeAgg.IpRange.Field)
+		}
+		if len(ipRangeAgg.IpRange.Ranges) != 2 {
+			t.Errorf("Expected 2 ranges, got %d", len(ipRangeAgg.IpRange.Ranges))
+		}
+	})
+}
+
+func TestMissingAgg(t *testing.T) {
+	t.Run("basic missing aggregation", func(t *testing.T) {
+		aggs := NewAggregations(
+			MissingAgg("missing_emails", "email"),
+		)
+		
+		missingAgg := aggs.Aggregations["missing_emails"]
+		if missingAgg.Missing == nil {
+			t.Fatal("Expected Missing aggregation to not be nil")
+		}
+		if missingAgg.Missing.Field == nil {
+			t.Fatal("Expected Missing field to not be nil")
+		}
+		if *missingAgg.Missing.Field != "email" {
+			t.Errorf("Expected field to be 'email', got '%s'", *missingAgg.Missing.Field)
+		}
+	})
+}
+
+func TestRareTermsAgg(t *testing.T) {
+	t.Run("basic rare terms aggregation", func(t *testing.T) {
+		aggs := NewAggregations(
+			RareTermsAgg("rare_categories", "category"),
+		)
+		
+		rareTermsAgg := aggs.Aggregations["rare_categories"]
+		if rareTermsAgg.RareTerms == nil {
+			t.Fatal("Expected RareTerms aggregation to not be nil")
+		}
+		if rareTermsAgg.RareTerms.Field == nil {
+			t.Fatal("Expected RareTerms field to not be nil")
+		}
+		if *rareTermsAgg.RareTerms.Field != "category" {
+			t.Errorf("Expected field to be 'category', got '%s'", *rareTermsAgg.RareTerms.Field)
+		}
+	})
+}
+
+func TestSamplerAgg(t *testing.T) {
+	t.Run("basic sampler aggregation", func(t *testing.T) {
+		aggs := NewAggregations(
+			SamplerAgg("sample", 1000),
+		)
+		
+		samplerAgg := aggs.Aggregations["sample"]
+		if samplerAgg.Sampler == nil {
+			t.Fatal("Expected Sampler aggregation to not be nil")
+		}
+		if samplerAgg.Sampler.ShardSize == nil {
+			t.Fatal("Expected Sampler ShardSize to not be nil")
+		}
+		if *samplerAgg.Sampler.ShardSize != 1000 {
+			t.Errorf("Expected shard size to be 1000, got %d", *samplerAgg.Sampler.ShardSize)
+		}
+	})
+}
+
+func TestDiversifiedSamplerAgg(t *testing.T) {
+	t.Run("basic diversified sampler aggregation", func(t *testing.T) {
+		aggs := NewAggregations(
+			DiversifiedSamplerAgg("diversified_sample", "category", 1000),
+		)
+		
+		diversifiedSamplerAgg := aggs.Aggregations["diversified_sample"]
+		if diversifiedSamplerAgg.DiversifiedSampler == nil {
+			t.Fatal("Expected DiversifiedSampler aggregation to not be nil")
+		}
+		if diversifiedSamplerAgg.DiversifiedSampler.Field == nil {
+			t.Fatal("Expected DiversifiedSampler field to not be nil")
+		}
+		if *diversifiedSamplerAgg.DiversifiedSampler.Field != "category" {
+			t.Errorf("Expected field to be 'category', got '%s'", *diversifiedSamplerAgg.DiversifiedSampler.Field)
+		}
+		if diversifiedSamplerAgg.DiversifiedSampler.ShardSize == nil {
+			t.Fatal("Expected DiversifiedSampler ShardSize to not be nil")
+		}
+		if *diversifiedSamplerAgg.DiversifiedSampler.ShardSize != 1000 {
+			t.Errorf("Expected shard size to be 1000, got %d", *diversifiedSamplerAgg.DiversifiedSampler.ShardSize)
+		}
+	})
+}
+
+func TestReverseNestedAgg(t *testing.T) {
+	t.Run("basic reverse nested aggregation", func(t *testing.T) {
+		aggs := NewAggregations(
+			ReverseNestedAgg("back_to_parent"),
+		)
+		
+		reverseNestedAgg := aggs.Aggregations["back_to_parent"]
+		if reverseNestedAgg.ReverseNested == nil {
+			t.Fatal("Expected ReverseNested aggregation to not be nil")
+		}
+	})
+
+	t.Run("reverse nested aggregation with path", func(t *testing.T) {
+		aggs := NewAggregations(
+			ReverseNestedAgg("back_to_parent", "parent_path"),
+		)
+		
+		reverseNestedAgg := aggs.Aggregations["back_to_parent"]
+		if reverseNestedAgg.ReverseNested == nil {
+			t.Fatal("Expected ReverseNested aggregation to not be nil")
+		}
+		if reverseNestedAgg.ReverseNested.Path == nil {
+			t.Fatal("Expected ReverseNested path to not be nil")
+		}
+		if *reverseNestedAgg.ReverseNested.Path != "parent_path" {
+			t.Errorf("Expected path to be 'parent_path', got '%s'", *reverseNestedAgg.ReverseNested.Path)
+		}
+	})
+}
+
+func TestChildrenAgg(t *testing.T) {
+	t.Run("basic children aggregation", func(t *testing.T) {
+		aggs := NewAggregations(
+			ChildrenAgg("child_products", "product"),
+		)
+		
+		childrenAgg := aggs.Aggregations["child_products"]
+		if childrenAgg.Children == nil {
+			t.Fatal("Expected Children aggregation to not be nil")
+		}
+		if childrenAgg.Children.Type == nil {
+			t.Fatal("Expected Children type to not be nil")
+		}
+		if *childrenAgg.Children.Type != "product" {
+			t.Errorf("Expected type to be 'product', got '%s'", *childrenAgg.Children.Type)
+		}
+	})
+}
+
+func TestParentAgg(t *testing.T) {
+	t.Run("basic parent aggregation", func(t *testing.T) {
+		aggs := NewAggregations(
+			ParentAgg("parent_categories", "category"),
+		)
+		
+		parentAgg := aggs.Aggregations["parent_categories"]
+		if parentAgg.Parent == nil {
+			t.Fatal("Expected Parent aggregation to not be nil")
+		}
+		if parentAgg.Parent.Type == nil {
+			t.Fatal("Expected Parent type to not be nil")
+		}
+		if *parentAgg.Parent.Type != "category" {
+			t.Errorf("Expected type to be 'category', got '%s'", *parentAgg.Parent.Type)
+		}
+	})
+}
+
+func TestAutoDateHistogramAgg(t *testing.T) {
+	t.Run("basic auto date histogram aggregation", func(t *testing.T) {
+		aggs := NewAggregations(
+			AutoDateHistogramAgg("auto_dates", "timestamp", 10),
+		)
+		
+		autoDateHistAgg := aggs.Aggregations["auto_dates"]
+		if autoDateHistAgg.AutoDateHistogram == nil {
+			t.Fatal("Expected AutoDateHistogram aggregation to not be nil")
+		}
+		if autoDateHistAgg.AutoDateHistogram.Field == nil {
+			t.Fatal("Expected AutoDateHistogram field to not be nil")
+		}
+		if *autoDateHistAgg.AutoDateHistogram.Field != "timestamp" {
+			t.Errorf("Expected field to be 'timestamp', got '%s'", *autoDateHistAgg.AutoDateHistogram.Field)
+		}
+		if autoDateHistAgg.AutoDateHistogram.Buckets == nil {
+			t.Fatal("Expected AutoDateHistogram buckets to not be nil")
+		}
+		if *autoDateHistAgg.AutoDateHistogram.Buckets != 10 {
+			t.Errorf("Expected buckets to be 10, got %d", *autoDateHistAgg.AutoDateHistogram.Buckets)
+		}
+	})
+}
+
+func TestVariableWidthHistogramAgg(t *testing.T) {
+	t.Run("basic variable width histogram aggregation", func(t *testing.T) {
+		aggs := NewAggregations(
+			VariableWidthHistogramAgg("variable_histogram", "price", 10),
+		)
+		
+		variableHistAgg := aggs.Aggregations["variable_histogram"]
+		if variableHistAgg.VariableWidthHistogram == nil {
+			t.Fatal("Expected VariableWidthHistogram aggregation to not be nil")
+		}
+		if variableHistAgg.VariableWidthHistogram.Field == nil {
+			t.Fatal("Expected VariableWidthHistogram field to not be nil")
+		}
+		if *variableHistAgg.VariableWidthHistogram.Field != "price" {
+			t.Errorf("Expected field to be 'price', got '%s'", *variableHistAgg.VariableWidthHistogram.Field)
+		}
+		if variableHistAgg.VariableWidthHistogram.Buckets == nil {
+			t.Fatal("Expected VariableWidthHistogram buckets to not be nil")
+		}
+		if *variableHistAgg.VariableWidthHistogram.Buckets != 10 {
+			t.Errorf("Expected buckets to be 10, got %d", *variableHistAgg.VariableWidthHistogram.Buckets)
+		}
+	})
+}
+
+func TestSignificantTextAgg(t *testing.T) {
+	t.Run("basic significant text aggregation", func(t *testing.T) {
+		aggs := NewAggregations(
+			SignificantTextAgg("significant_text", "description"),
+		)
+		
+		significantTextAgg := aggs.Aggregations["significant_text"]
+		if significantTextAgg.SignificantText == nil {
+			t.Fatal("Expected SignificantText aggregation to not be nil")
+		}
+		if significantTextAgg.SignificantText.Field == nil {
+			t.Fatal("Expected SignificantText field to not be nil")
+		}
+		if *significantTextAgg.SignificantText.Field != "description" {
+			t.Errorf("Expected field to be 'description', got '%s'", *significantTextAgg.SignificantText.Field)
+		}
+	})
+}
+
+func TestPipelineAggregations(t *testing.T) {
+	t.Run("avg bucket aggregation", func(t *testing.T) {
+		aggs := NewAggregations(
+			AvgBucketAgg("avg_monthly_sales", "monthly_sales>total_sales"),
+		)
+		
+		avgBucketAgg := aggs.Aggregations["avg_monthly_sales"]
+		if avgBucketAgg.AvgBucket == nil {
+			t.Fatal("Expected AvgBucket aggregation to not be nil")
+		}
+		if bucketsPath, ok := avgBucketAgg.AvgBucket.BucketsPath.(string); !ok || bucketsPath != "monthly_sales>total_sales" {
+			t.Errorf("Expected buckets path to be 'monthly_sales>total_sales', got '%v'", avgBucketAgg.AvgBucket.BucketsPath)
+		}
+	})
+
+	t.Run("max bucket aggregation", func(t *testing.T) {
+		aggs := NewAggregations(
+			MaxBucketAgg("max_monthly_sales", "monthly_sales>total_sales"),
+		)
+		
+		maxBucketAgg := aggs.Aggregations["max_monthly_sales"]
+		if maxBucketAgg.MaxBucket == nil {
+			t.Fatal("Expected MaxBucket aggregation to not be nil")
+		}
+		if bucketsPath, ok := maxBucketAgg.MaxBucket.BucketsPath.(string); !ok || bucketsPath != "monthly_sales>total_sales" {
+			t.Errorf("Expected buckets path to be 'monthly_sales>total_sales', got '%v'", maxBucketAgg.MaxBucket.BucketsPath)
+		}
+	})
+
+	t.Run("min bucket aggregation", func(t *testing.T) {
+		aggs := NewAggregations(
+			MinBucketAgg("min_monthly_sales", "monthly_sales>total_sales"),
+		)
+		
+		minBucketAgg := aggs.Aggregations["min_monthly_sales"]
+		if minBucketAgg.MinBucket == nil {
+			t.Fatal("Expected MinBucket aggregation to not be nil")
+		}
+		if bucketsPath, ok := minBucketAgg.MinBucket.BucketsPath.(string); !ok || bucketsPath != "monthly_sales>total_sales" {
+			t.Errorf("Expected buckets path to be 'monthly_sales>total_sales', got '%v'", minBucketAgg.MinBucket.BucketsPath)
+		}
+	})
+
+	t.Run("sum bucket aggregation", func(t *testing.T) {
+		aggs := NewAggregations(
+			SumBucketAgg("total_monthly_sales", "monthly_sales>total_sales"),
+		)
+		
+		sumBucketAgg := aggs.Aggregations["total_monthly_sales"]
+		if sumBucketAgg.SumBucket == nil {
+			t.Fatal("Expected SumBucket aggregation to not be nil")
+		}
+		if bucketsPath, ok := sumBucketAgg.SumBucket.BucketsPath.(string); !ok || bucketsPath != "monthly_sales>total_sales" {
+			t.Errorf("Expected buckets path to be 'monthly_sales>total_sales', got '%v'", sumBucketAgg.SumBucket.BucketsPath)
+		}
+	})
+
+	t.Run("stats bucket aggregation", func(t *testing.T) {
+		aggs := NewAggregations(
+			StatsBucketAgg("sales_stats", "monthly_sales>total_sales"),
+		)
+		
+		statsBucketAgg := aggs.Aggregations["sales_stats"]
+		if statsBucketAgg.StatsBucket == nil {
+			t.Fatal("Expected StatsBucket aggregation to not be nil")
+		}
+		if bucketsPath, ok := statsBucketAgg.StatsBucket.BucketsPath.(string); !ok || bucketsPath != "monthly_sales>total_sales" {
+			t.Errorf("Expected buckets path to be 'monthly_sales>total_sales', got '%v'", statsBucketAgg.StatsBucket.BucketsPath)
+		}
+	})
+
+	t.Run("extended stats bucket aggregation", func(t *testing.T) {
+		aggs := NewAggregations(
+			ExtendedStatsBucketAgg("sales_extended_stats", "monthly_sales>total_sales"),
+		)
+		
+		extendedStatsBucketAgg := aggs.Aggregations["sales_extended_stats"]
+		if extendedStatsBucketAgg.ExtendedStatsBucket == nil {
+			t.Fatal("Expected ExtendedStatsBucket aggregation to not be nil")
+		}
+		if bucketsPath, ok := extendedStatsBucketAgg.ExtendedStatsBucket.BucketsPath.(string); !ok || bucketsPath != "monthly_sales>total_sales" {
+			t.Errorf("Expected buckets path to be 'monthly_sales>total_sales', got '%v'", extendedStatsBucketAgg.ExtendedStatsBucket.BucketsPath)
+		}
+	})
+
+	t.Run("percentiles bucket aggregation", func(t *testing.T) {
+		aggs := NewAggregations(
+			PercentilesBucketAgg("sales_percentiles", "monthly_sales>total_sales"),
+		)
+		
+		percentilesBucketAgg := aggs.Aggregations["sales_percentiles"]
+		if percentilesBucketAgg.PercentilesBucket == nil {
+			t.Fatal("Expected PercentilesBucket aggregation to not be nil")
+		}
+		if bucketsPath, ok := percentilesBucketAgg.PercentilesBucket.BucketsPath.(string); !ok || bucketsPath != "monthly_sales>total_sales" {
+			t.Errorf("Expected buckets path to be 'monthly_sales>total_sales', got '%v'", percentilesBucketAgg.PercentilesBucket.BucketsPath)
+		}
+	})
+
+	t.Run("derivative aggregation", func(t *testing.T) {
+		aggs := NewAggregations(
+			DerivativeAgg("sales_derivative", "sales"),
+		)
+		
+		derivativeAgg := aggs.Aggregations["sales_derivative"]
+		if derivativeAgg.Derivative == nil {
+			t.Fatal("Expected Derivative aggregation to not be nil")
+		}
+		if bucketsPath, ok := derivativeAgg.Derivative.BucketsPath.(string); !ok || bucketsPath != "sales" {
+			t.Errorf("Expected buckets path to be 'sales', got '%v'", derivativeAgg.Derivative.BucketsPath)
+		}
+	})
+
+	t.Run("cumulative sum aggregation", func(t *testing.T) {
+		aggs := NewAggregations(
+			CumulativeSumAgg("cumulative_sales", "sales"),
+		)
+		
+		cumulativeSumAgg := aggs.Aggregations["cumulative_sales"]
+		if cumulativeSumAgg.CumulativeSum == nil {
+			t.Fatal("Expected CumulativeSum aggregation to not be nil")
+		}
+		if bucketsPath, ok := cumulativeSumAgg.CumulativeSum.BucketsPath.(string); !ok || bucketsPath != "sales" {
+			t.Errorf("Expected buckets path to be 'sales', got '%v'", cumulativeSumAgg.CumulativeSum.BucketsPath)
+		}
+	})
+}
+
+func TestGeoGridAggregations(t *testing.T) {
+	t.Run("geohash grid aggregation", func(t *testing.T) {
+		aggs := NewAggregations(
+			GeohashGridAgg("location_grid", "location", 5),
+		)
+		
+		geohashGridAgg := aggs.Aggregations["location_grid"]
+		if geohashGridAgg.GeohashGrid == nil {
+			t.Fatal("Expected GeohashGrid aggregation to not be nil")
+		}
+		if geohashGridAgg.GeohashGrid.Field == nil {
+			t.Fatal("Expected GeohashGrid field to not be nil")
+		}
+		if *geohashGridAgg.GeohashGrid.Field != "location" {
+			t.Errorf("Expected field to be 'location', got '%s'", *geohashGridAgg.GeohashGrid.Field)
+		}
+		if geohashGridAgg.GeohashGrid.Precision == nil {
+			t.Fatal("Expected GeohashGrid precision to not be nil")
+		}
+		// GeohashGrid precision 可能是 int 或 *int 类型，我们需要检查实际值
+		switch p := geohashGridAgg.GeohashGrid.Precision.(type) {
+		case int:
+			if p != 5 {
+				t.Errorf("Expected precision to be 5, got %d", p)
+			}
+		case *int:
+			if *p != 5 {
+				t.Errorf("Expected precision to be 5, got %d", *p)
+			}
+		default:
+			t.Errorf("Expected precision to be int or *int, got %T", p)
+		}
+	})
+
+	t.Run("geotile grid aggregation", func(t *testing.T) {
+		aggs := NewAggregations(
+			GeotileGridAgg("tile_grid", "location", 8),
+		)
+		
+		geotileGridAgg := aggs.Aggregations["tile_grid"]
+		if geotileGridAgg.GeotileGrid == nil {
+			t.Fatal("Expected GeotileGrid aggregation to not be nil")
+		}
+		if geotileGridAgg.GeotileGrid.Field == nil {
+			t.Fatal("Expected GeotileGrid field to not be nil")
+		}
+		if *geotileGridAgg.GeotileGrid.Field != "location" {
+			t.Errorf("Expected field to be 'location', got '%s'", *geotileGridAgg.GeotileGrid.Field)
+		}
+		if geotileGridAgg.GeotileGrid.Precision == nil {
+			t.Fatal("Expected GeotileGrid precision to not be nil")
+		}
+		if *geotileGridAgg.GeotileGrid.Precision != 8 {
+			t.Errorf("Expected precision to be 8, got %d", *geotileGridAgg.GeotileGrid.Precision)
+		}
+	})
+}
+
+func TestAdvancedMetricAggregations(t *testing.T) {
+	t.Run("weighted avg aggregation", func(t *testing.T) {
+		aggs := NewAggregations(
+			WeightedAvgAgg("weighted_avg_price", "price", "quantity"),
+		)
+		
+		weightedAvgAgg := aggs.Aggregations["weighted_avg_price"]
+		if weightedAvgAgg.WeightedAvg == nil {
+			t.Fatal("Expected WeightedAvg aggregation to not be nil")
+		}
+		if weightedAvgAgg.WeightedAvg.Value == nil {
+			t.Fatal("Expected WeightedAvg value to not be nil")
+		}
+		if weightedAvgAgg.WeightedAvg.Value.Field == nil {
+			t.Fatal("Expected WeightedAvg value field to not be nil")
+		}
+		if *weightedAvgAgg.WeightedAvg.Value.Field != "price" {
+			t.Errorf("Expected value field to be 'price', got '%s'", *weightedAvgAgg.WeightedAvg.Value.Field)
+		}
+		if weightedAvgAgg.WeightedAvg.Weight == nil {
+			t.Fatal("Expected WeightedAvg weight to not be nil")
+		}
+		if weightedAvgAgg.WeightedAvg.Weight.Field == nil {
+			t.Fatal("Expected WeightedAvg weight field to not be nil")
+		}
+		if *weightedAvgAgg.WeightedAvg.Weight.Field != "quantity" {
+			t.Errorf("Expected weight field to be 'quantity', got '%s'", *weightedAvgAgg.WeightedAvg.Weight.Field)
+		}
+	})
+
+	t.Run("median absolute deviation aggregation", func(t *testing.T) {
+		aggs := NewAggregations(
+			MedianAbsoluteDeviationAgg("price_mad", "price"),
+		)
+		
+		madAgg := aggs.Aggregations["price_mad"]
+		if madAgg.MedianAbsoluteDeviation == nil {
+			t.Fatal("Expected MedianAbsoluteDeviation aggregation to not be nil")
+		}
+		if madAgg.MedianAbsoluteDeviation.Field == nil {
+			t.Fatal("Expected MedianAbsoluteDeviation field to not be nil")
+		}
+		if *madAgg.MedianAbsoluteDeviation.Field != "price" {
+			t.Errorf("Expected field to be 'price', got '%s'", *madAgg.MedianAbsoluteDeviation.Field)
+		}
+	})
+
+	t.Run("string stats aggregation", func(t *testing.T) {
+		aggs := NewAggregations(
+			StringStatsAgg("description_stats", "description"),
+		)
+		
+		stringStatsAgg := aggs.Aggregations["description_stats"]
+		if stringStatsAgg.StringStats == nil {
+			t.Fatal("Expected StringStats aggregation to not be nil")
+		}
+		if stringStatsAgg.StringStats.Field == nil {
+			t.Fatal("Expected StringStats field to not be nil")
+		}
+		if *stringStatsAgg.StringStats.Field != "description" {
+			t.Errorf("Expected field to be 'description', got '%s'", *stringStatsAgg.StringStats.Field)
+		}
+	})
+
+	t.Run("t test aggregation", func(t *testing.T) {
+		aggs := NewAggregations(
+			TTestAgg("t_test", "score", Term("group", "A"), Term("group", "B")),
+		)
+		
+		tTestAgg := aggs.Aggregations["t_test"]
+		if tTestAgg.TTest == nil {
+			t.Fatal("Expected TTest aggregation to not be nil")
+		}
+		if tTestAgg.TTest.A == nil {
+			t.Fatal("Expected TTest A population to not be nil")
+		}
+		if tTestAgg.TTest.A.Field != "score" {
+			t.Errorf("Expected A field to be 'score', got '%s'", tTestAgg.TTest.A.Field)
+		}
+		if tTestAgg.TTest.B == nil {
+			t.Fatal("Expected TTest B population to not be nil")
+		}
+		if tTestAgg.TTest.B.Field != "score" {
+			t.Errorf("Expected B field to be 'score', got '%s'", tTestAgg.TTest.B.Field)
+		}
+	})
+}
+

@@ -1600,16 +1600,3 @@ func BuildAdvancedPipelineAggs() *types.Aggregations {
     )
 }
 ```
-
-这个完整的文档现在涵盖了 ESB 库的所有主要功能，包括：
-
-1. **基础查询**：MatchAll, MatchNone
-2. **全文搜索**：Match, MatchPhrase, MatchPhrasePrefix, MultiMatch, QueryString, SimpleQueryString
-3. **词项级查询**：Term, Terms, Range, Exists, Prefix, Wildcard, Regexp, Fuzzy, IDs, TermsSet
-4. **复合查询**：Bool, Boosting, DisMax, ConstantScore
-5. **地理位置查询**：GeoDistance, GeoBoundingBox, GeoPolygon, GeoShape
-6. **特殊查询**：Nested, Script, MoreLikeThis
-7. **聚合查询**：基础聚合、高级聚合、管道聚合
-8. **最佳实践**：性能优化、相关性优化、复杂业务场景
-
-每个查询类型都包含了 1-3 个实际的业务场景示例，展示了如何在电商、内容管理、用户分析等真实项目中使用这些查询。

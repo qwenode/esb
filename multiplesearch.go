@@ -5,6 +5,7 @@ import (
     "errors"
     "strings"
 
+    "github.com/elastic/go-elasticsearch/v8"
     "github.com/elastic/go-elasticsearch/v8/typedapi/core/msearch"
     "github.com/elastic/go-elasticsearch/v8/typedapi/types"
 )
@@ -66,8 +67,8 @@ type MultiSearch struct {
     postProcessors map[string]MultiSearchPostProcessor
 }
 
-func NewMSearchBuilder(m *msearch.Msearch) *MultiSearch {
-    return &MultiSearch{client: m, postProcessors: make(map[string]MultiSearchPostProcessor)}
+func NewMultiSearchBuilder(client *elasticsearch.TypedClient) *MultiSearch {
+    return &MultiSearch{client: client.Msearch(), postProcessors: make(map[string]MultiSearchPostProcessor)}
 }
 
 func (r *MultiSearch) AddSearch(index string, query *types.Query, postProcessor MultiSearchPostProcessor, size int, preProcessor ...MultiSearchPreProcessor) *MultiSearch {

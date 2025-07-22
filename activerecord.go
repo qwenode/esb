@@ -244,10 +244,10 @@ func FormatOne[T any](response *get.Response, err error) (T, error) {
 }
 
 // 解析后的回调处理,如果_append=false,则数据不会返回 20250722
-type FormatHitsPostprocessor[T any] func(src T) (_append bool)
+type FormatHitsPostProcessor[T any] func(src T) (_append bool)
 
 // 解析多条数据返回值 20250722
-func FormatSearch[T any](response *search.Response, postprocessor FormatHitsPostprocessor[T]) []T {
+func FormatSearch[T any](response *search.Response, postprocessor FormatHitsPostProcessor[T]) []T {
     if response == nil || response.Hits.Hits == nil {
         return nil
     }

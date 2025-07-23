@@ -1,4 +1,4 @@
-package esb
+package multisearch
 
 import (
     "context"
@@ -11,7 +11,7 @@ import (
 )
 
 //  仅包含指定字段 
-func MultiSearchWithIncludeSourceFields(fields ...string) MultiSearchPreProcessor {
+func WithIncludeSourceFields(fields ...string) PreProcessor {
     return func(header *types.MultisearchHeader, body *types.MultisearchBody) {
         body.Source_ = types.SourceFilter{
             Includes: fields,
@@ -20,28 +20,28 @@ func MultiSearchWithIncludeSourceFields(fields ...string) MultiSearchPreProcesso
 }
 
 //  排除指定字段 
-func MultiSearchWithExcludeSourceFields(fields ...string) MultiSearchPreProcessor {
+func WithExcludeSourceFields(fields ...string) PreProcessor {
     return func(header *types.MultisearchHeader, body *types.MultisearchBody) {
         body.Source_ = types.SourceFilter{
             Excludes: fields,
         }
     }
 }
-func MultiSearchWithFunc(optionFunc MultiSearchPreProcessor) MultiSearchPreProcessor {
+func WithFunc(optionFunc PreProcessor) PreProcessor {
     return func(header *types.MultisearchHeader, body *types.MultisearchBody) {
         optionFunc(header, body)
     }
 }
 
-func MultiSearchWithSort(options ...types.SortCombinations) MultiSearchPreProcessor {
+func WithSort(options ...types.SortCombinations) PreProcessor {
     return func(header *types.MultisearchHeader, body *types.MultisearchBody) {
         body.Sort = options
     }
 }
-func MultiSearchWithSize10000() MultiSearchPreProcessor {
-    return MultiSearchWithSize(10000, 0)
+func WithSize10000() PreProcessor {
+    return WithSize(10000, 0)
 }
-func MultiSearchWithSize(size int, from int) MultiSearchPreProcessor {
+func WithSize(size int, from int) PreProcessor {
     return func(header *types.MultisearchHeader, body *types.MultisearchBody) {
         // 如果size=0就执行不到hitLen>0,也就无法获取index,导致aggs没内容,所以size必须大于0 20250523
         if size <= 0 {
@@ -56,22 +56,22 @@ func MultiSearchWithSize(size int, from int) MultiSearchPreProcessor {
 
 type (
     // 查询前的参数数量 20250722
-    MultiSearchPreProcessor func(header *types.MultisearchHeader, body *types.MultisearchBody)
+    PreProcessor func(header *types.MultisearchHeader, body *types.MultisearchBody)
     // 查询成功后的数据处理 20250722
-    MultiSearchPostProcessor func(msi *types.MultiSearchItem, resultLength int, index string)
+    PostProcessor func(msi *types.MultiSearchItem, resultLength int, index string)
 )
 
 // 并发查询 20250722
 type MultiSearch struct {
     client         *msearch.Msearch
-    postProcessors map[string]MultiSearchPostProcessor
+    postProcessors map[string]PostProcessor
 }
 
-func NewMultiSearchBuilder(client *elasticsearch.TypedClient) *MultiSearch {
-    return &MultiSearch{client: client.Msearch(), postProcessors: make(map[string]MultiSearchPostProcessor)}
+func NewBuilder(client *elasticsearch.TypedClient) *MultiSearch {
+    return &MultiSearch{client: client.Msearch(), postProcessors: make(map[string]PostProcessor)}
 }
 
-func (r *MultiSearch) AddSearch(index string, query *types.Query, postProcessor MultiSearchPostProcessor, size int, preProcessor ...MultiSearchPreProcessor) *MultiSearch {
+func (r *MultiSearch) AddSearch(index string, query *types.Query, postProcessor PostProcessor, size int, preProcessor ...PreProcessor) *MultiSearch {
     header := &types.MultisearchHeader{
         Index: []string{index},
     }
@@ -98,7 +98,7 @@ type (
 )
 
 // 默认index与alias对应处理器,index必须以_日期结尾,如(prefix_table_20250808)=(prefix_table) 20250722
-func MultiSearchDefaultAliasProcessor() AliasProcessor {
+func DefaultAliasProcessor() AliasProcessor {
     return func(index string) string {
         sub := "_20"
         if !strings.Contains(index, sub) {
@@ -114,7 +114,7 @@ func (r *MultiSearch) Do(c context.Context, aliasProcessors ...AliasProcessor) e
     if err != nil {
         return err
     }
-    aliasProcess := MultiSearchDefaultAliasProcessor()
+    aliasProcess := DefaultAliasProcessor()
     if len(aliasProcessors) > 0 {
         aliasProcess = aliasProcessors[0]
     }

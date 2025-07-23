@@ -1,4 +1,4 @@
-package esb
+package activerecord
 
 import (
     "context"
@@ -21,16 +21,16 @@ func IsNoData(err error) bool {
     return errors.Is(err, ErrNoData)
 }
 
-type ActiveRecordAlias interface {
+type Alias interface {
     GetIndexAlias() string
 }
-type ActiveRecord[T ActiveRecordAlias] struct {
+type ActiveRecord[T Alias] struct {
     client  *elasticsearch.TypedClient
     refresh bool
     entity  T
 }
 
-func NewActiveRecord[T ActiveRecordAlias](client *elasticsearch.TypedClient, entity T) *ActiveRecord[T] {
+func New[T Alias](client *elasticsearch.TypedClient, entity T) *ActiveRecord[T] {
     return &ActiveRecord[T]{
         entity: entity,
         client: client,
@@ -244,10 +244,10 @@ func FormatOne[T any](response *get.Response, err error) (T, error) {
 }
 
 // 解析后的回调处理,如果_append=false,则数据不会返回 20250722
-type FormatHitsPostProcessor[T any] func(src T) (_append bool)
+type FormatSearchPostProcessor[T any] func(src T) (_append bool)
 
 // 解析多条数据返回值 20250722
-func FormatSearch[T any](response *search.Response, postprocessor FormatHitsPostProcessor[T]) []T {
+func FormatSearch[T any](response *search.Response, postprocessor FormatSearchPostProcessor[T]) []T {
     if response == nil || response.Hits.Hits == nil {
         return nil
     }

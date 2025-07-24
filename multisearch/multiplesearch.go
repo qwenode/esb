@@ -71,7 +71,7 @@ func NewBuilder(client *elasticsearch.TypedClient) *MultiSearch {
     return &MultiSearch{client: client.Msearch(), postProcessors: make(map[string]PostProcessor)}
 }
 
-func (r *MultiSearch) AddSearch(index string, query *types.Query, postProcessor PostProcessor, size int, preProcessor ...PreProcessor) *MultiSearch {
+func (r *MultiSearch) AddSearch(index string, query *types.Query, size int, postProcessor PostProcessor, preProcessor ...PreProcessor) *MultiSearch {
     header := &types.MultisearchHeader{
         Index: []string{index},
     }

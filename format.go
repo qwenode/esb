@@ -5,7 +5,7 @@ import (
     "errors"
 
     "github.com/elastic/go-elasticsearch/v8/typedapi/core/get"
-    "github.com/elastic/go-elasticsearch/v8/typedapi/core/search"
+    "github.com/elastic/go-elasticsearch/v8/typedapi/types"
 )
 
 var (
@@ -33,11 +33,11 @@ func FormatOne[T any](response *get.Response, err error) (T, error) {
 type FormatSearchPostProcessor[T any] func(src T) (_append bool)
 
 // 解析多条数据返回值 20250722
-func FormatSearch[T any](response *search.Response, postprocessor FormatSearchPostProcessor[T]) []T {
-    if response == nil || response.Hits.Hits == nil {
+func FormatSearch[T any](response types.HitsMetadata, postprocessor FormatSearchPostProcessor[T]) []T {
+    if response.Hits == nil {
         return nil
     }
-    hits := response.Hits.Hits
+    hits := response.Hits
     hLen := len(hits)
     if hLen <= 0 {
         return nil

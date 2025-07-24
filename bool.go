@@ -1,7 +1,7 @@
 package esb
 
 import (
-	"github.com/elastic/go-elasticsearch/v8/typedapi/types"
+    "github.com/elastic/go-elasticsearch/v8/typedapi/types"
 )
 
 // BoolOption 表示一个修改 types.BoolQuery 的函数。
@@ -28,13 +28,13 @@ type BoolOption func(*types.BoolQuery)
 //       ),
 //   )
 func Bool(opts ...BoolOption) QueryOption {
-	return func(q *types.Query) {
-		boolQuery := &types.BoolQuery{}
-		for _, opt := range opts {
-			opt(boolQuery)
-		}
-		q.Bool = boolQuery
-	}
+    return func(q *types.Query) {
+        boolQuery := &types.BoolQuery{}
+        for _, opt := range opts {
+            opt(boolQuery)
+        }
+        q.Bool = boolQuery
+    }
 }
 
 // Must 指定文档必须匹配的查询条件。
@@ -46,13 +46,13 @@ func Bool(opts ...BoolOption) QueryOption {
 //       esb.Range("date").Gte("2023-01-01").Build(),
 //   )
 func Must(opts ...QueryOption) BoolOption {
-	return func(bq *types.BoolQuery) {
-		for _, opt := range opts {
-			subQuery := &types.Query{}
-			opt(subQuery)
-			bq.Must = append(bq.Must, *subQuery)
-		}
-	}
+    return func(bq *types.BoolQuery) {
+        for _, opt := range opts {
+            subQuery := &types.Query{}
+            opt(subQuery)
+            bq.Must = append(bq.Must, *subQuery)
+        }
+    }
 }
 
 // Should 指定文档应该匹配的查询条件。
@@ -65,13 +65,13 @@ func Must(opts ...QueryOption) BoolOption {
 //       esb.Match("content", "search engine"),
 //   )
 func Should(opts ...QueryOption) BoolOption {
-	return func(bq *types.BoolQuery) {
-		for _, opt := range opts {
-			subQuery := &types.Query{}
-			opt(subQuery)
-			bq.Should = append(bq.Should, *subQuery)
-		}
-	}
+    return func(bq *types.BoolQuery) {
+        for _, opt := range opts {
+            subQuery := &types.Query{}
+            opt(subQuery)
+            bq.Should = append(bq.Should, *subQuery)
+        }
+    }
 }
 
 // Filter 指定文档必须匹配的查询条件，
@@ -84,13 +84,48 @@ func Should(opts ...QueryOption) BoolOption {
 //       esb.Range("publish_date").Gte("2023-01-01").Build(),
 //   )
 func Filter(opts ...QueryOption) BoolOption {
-	return func(bq *types.BoolQuery) {
-		for _, opt := range opts {
-			subQuery := &types.Query{}
-			opt(subQuery)
-			bq.Filter = append(bq.Filter, *subQuery)
-		}
-	}
+    return func(bq *types.BoolQuery) {
+        for _, opt := range opts {
+            subQuery := &types.Query{}
+            opt(subQuery)
+            bq.Filter = append(bq.Filter, *subQuery)
+        }
+    }
+}
+
+// BoolFilter 创建一个只包含 Filter 子句的布尔查询。
+// 这是一个便捷函数，用于快速创建仅包含过滤条件的布尔查询。
+// Filter 查询不会影响文档得分，并且会被缓存以提高性能。
+//
+// 示例：
+//   query, err := esb.NewQuery(
+//       esb.BoolFilter(
+//           esb.Term("status", "published"),
+//           esb.Range("date").Gte("2023-01-01").Build(),
+//           esb.Term("category", "tech"),
+//       ),
+//   )
+//
+// 等价于：
+//   query, err := esb.NewQuery(
+//       esb.Bool(
+//           esb.Filter(
+//               esb.Term("status", "published"),
+//               esb.Range("date").Gte("2023-01-01").Build(),
+//               esb.Term("category", "tech"),
+//           ),
+//       ),
+//   )
+func BoolFilter(opts ...QueryOption) QueryOption {
+    return func(bq *types.Query) {
+        boolQuery := &types.BoolQuery{}
+        for _, opt := range opts {
+            subQuery := &types.Query{}
+            opt(subQuery)
+            boolQuery.Filter = append(boolQuery.Filter, *subQuery)
+        }
+        bq.Bool = boolQuery
+    }
 }
 
 // MustNot 指定文档不能匹配的查询条件。
@@ -102,11 +137,11 @@ func Filter(opts ...QueryOption) BoolOption {
 //       esb.Term("hidden", true),
 //   )
 func MustNot(opts ...QueryOption) BoolOption {
-	return func(bq *types.BoolQuery) {
-		for _, opt := range opts {
-			subQuery := &types.Query{}
-			opt(subQuery)
-			bq.MustNot = append(bq.MustNot, *subQuery)
-		}
-	}
-} 
+    return func(bq *types.BoolQuery) {
+        for _, opt := range opts {
+            subQuery := &types.Query{}
+            opt(subQuery)
+            bq.MustNot = append(bq.MustNot, *subQuery)
+        }
+    }
+}

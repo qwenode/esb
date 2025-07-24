@@ -311,6 +311,183 @@ func TestBoolQueryCompatibility(t *testing.T) {
 	})
 }
 
+func TestBoolFilter(t *testing.T) {
+	t.Run("当没有提供选项时应该创建空的布尔过滤查询", func(t *testing.T) {
+		query := NewQuery(BoolFilter())
+		if query.Bool == nil {
+			t.Error("预期查询不为 nil")
+		}
+		if query.Bool == nil {
+			t.Error("预期为布尔查询")
+		}
+		// 应该只有空的 Filter 切片
+		if query.Bool.Filter != nil && len(query.Bool.Filter) > 0 {
+			t.Error("预期 Filter 子句为空")
+		}
+		if query.Bool.Must != nil && len(query.Bool.Must) > 0 {
+			t.Error("预期 Must 子句为空")
+		}
+		if query.Bool.Should != nil && len(query.Bool.Should) > 0 {
+			t.Error("预期 Should 子句为空")
+		}
+		if query.Bool.MustNot != nil && len(query.Bool.MustNot) > 0 {
+			t.Error("预期 MustNot 子句为空")
+		}
+	})
+
+	t.Run("应该创建带单个过滤条件的布尔查询", func(t *testing.T) {
+		query := NewQuery(
+			BoolFilter(
+				Term("status", "published"),
+			),
+		)
+		if query.Bool == nil {
+			t.Error("预期为布尔查询")
+		}
+		if len(query.Bool.Filter) != 1 {
+			t.Errorf("预期有 1 个 Filter 子句，得到 %d", len(query.Bool.Filter))
+		}
+		// 验证其他子句为空
+		if query.Bool.Must != nil && len(query.Bool.Must) > 0 {
+			t.Error("预期 Must 子句为空")
+		}
+		if query.Bool.Should != nil && len(query.Bool.Should) > 0 {
+			t.Error("预期 Should 子句为空")
+		}
+		if query.Bool.MustNot != nil && len(query.Bool.MustNot) > 0 {
+			t.Error("预期 MustNot 子句为空")
+		}
+	})
+
+	t.Run("应该创建带多个过滤条件的布尔查询", func(t *testing.T) {
+		query := NewQuery(
+			BoolFilter(
+				Term("status", "published"),
+				Term("active", "true"),
+				Terms("category", "tech", "science"),
+			),
+		)
+		if query.Bool == nil {
+			t.Error("预期为布尔查询")
+		}
+		if len(query.Bool.Filter) != 3 {
+			t.Errorf("预期有 3 个 Filter 子句，得到 %d", len(query.Bool.Filter))
+		}
+		// 验证其他子句为空
+		if query.Bool.Must != nil && len(query.Bool.Must) > 0 {
+			t.Error("预期 Must 子句为空")
+		}
+		if query.Bool.Should != nil && len(query.Bool.Should) > 0 {
+			t.Error("预期 Should 子句为空")
+		}
+		if query.Bool.MustNot != nil && len(query.Bool.MustNot) > 0 {
+			t.Error("预期 MustNot 子句为空")
+		}
+	})
+
+	t.Run("应该与使用 Bool + Filter 的结果等价", func(t *testing.T) {
+		// 使用 BoolFilter
+		query1 := NewQuery(
+			BoolFilter(
+				Term("status", "published"),
+				Term("active", "true"),
+			),
+		)
+
+		// 使用 Bool + Filter
+		query2 := NewQuery(
+			Bool(
+				Filter(
+					Term("status", "published"),
+					Term("active", "true"),
+				),
+			),
+		)
+
+		// 比较结构
+		if query1.Bool == nil || query2.Bool == nil {
+			t.Error("两个查询都应该有布尔查询")
+		}
+		
+		if len(query1.Bool.Filter) != len(query2.Bool.Filter) {
+			t.Errorf("Filter 子句数量不匹配：BoolFilter=%d，Bool+Filter=%d", 
+				len(query1.Bool.Filter), len(query2.Bool.Filter))
+		}
+
+		// 验证其他子句都为空
+		for i, query := range []*types.Query{query1, query2} {
+			if query.Bool.Must != nil && len(query.Bool.Must) > 0 {
+				t.Errorf("查询 %d 的 Must 子句应该为空", i+1)
+			}
+			if query.Bool.Should != nil && len(query.Bool.Should) > 0 {
+				t.Errorf("查询 %d 的 Should 子句应该为空", i+1)
+			}
+			if query.Bool.MustNot != nil && len(query.Bool.MustNot) > 0 {
+				t.Errorf("查询 %d 的 MustNot 子句应该为空", i+1)
+			}
+		}
+	})
+
+	t.Run("应该正确处理复杂的过滤条件", func(t *testing.T) {
+		query := NewQuery(
+			BoolFilter(
+				Term("status", "published"),
+				DateRange("date").Gte("2023-01-01").Build(),
+				Exists("author"),
+				Terms("tags", "elasticsearch", "search", "lucene"),
+			),
+		)
+		if query.Bool == nil {
+			t.Error("预期为布尔查询")
+		}
+		if len(query.Bool.Filter) != 4 {
+			t.Errorf("预期有 4 个 Filter 子句，得到 %d", len(query.Bool.Filter))
+		}
+
+		// 验证每个过滤条件的类型
+		filters := query.Bool.Filter
+		if filters[0].Term == nil {
+			t.Error("第一个过滤条件应该是 Term 查询")
+		}
+		if filters[1].Range == nil {
+			t.Error("第二个过滤条件应该是 Range 查询")
+		}
+		if filters[2].Exists == nil {
+			t.Error("第三个过滤条件应该是 Exists 查询")
+		}
+		if filters[3].Terms == nil {
+			t.Error("第四个过滤条件应该是 Terms 查询")
+		}
+	})
+
+	t.Run("应该支持嵌套的 BoolFilter", func(t *testing.T) {
+		query := NewQuery(
+			BoolFilter(
+				Term("status", "published"),
+				BoolFilter(
+					Term("category", "tech"),
+					Term("active", "true"),
+				),
+			),
+		)
+		if query.Bool == nil {
+			t.Error("预期为布尔查询")
+		}
+		if len(query.Bool.Filter) != 2 {
+			t.Errorf("预期有 2 个 Filter 子句，得到 %d", len(query.Bool.Filter))
+		}
+		
+		// 检查第二个过滤条件是否为嵌套布尔查询
+		nestedFilter := query.Bool.Filter[1]
+		if nestedFilter.Bool == nil {
+			t.Error("预期为嵌套布尔查询")
+		}
+		if len(nestedFilter.Bool.Filter) != 2 {
+			t.Errorf("预期嵌套查询中有 2 个 Filter 子句，得到 %d", len(nestedFilter.Bool.Filter))
+		}
+	})
+}
+
 // 布尔查询的基准测试
 func BenchmarkBoolQuery(b *testing.B) {
 	b.Run("带 Must 的简单布尔查询", func(b *testing.B) {
@@ -364,5 +541,57 @@ func BenchmarkBoolQuery(b *testing.B) {
 				),
 			)
 		}
+	})
+}
+
+// BoolFilter 的基准测试
+func BenchmarkBoolFilter(b *testing.B) {
+	b.Run("简单的 BoolFilter", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			_ = NewQuery(
+				BoolFilter(
+					Term("status", "published"),
+				),
+			)
+		}
+	})
+
+	b.Run("多个过滤条件的 BoolFilter", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			_ = NewQuery(
+				BoolFilter(
+					Term("status", "published"),
+					Term("active", "true"),
+					Terms("category", "tech", "science"),
+					DateRange("date").Gte("2023-01-01").Build(),
+				),
+			)
+		}
+	})
+
+	b.Run("BoolFilter vs Bool+Filter 性能比较", func(b *testing.B) {
+		b.Run("BoolFilter", func(b *testing.B) {
+			for i := 0; i < b.N; i++ {
+				_ = NewQuery(
+					BoolFilter(
+						Term("status", "published"),
+						Term("active", "true"),
+					),
+				)
+			}
+		})
+
+		b.Run("Bool+Filter", func(b *testing.B) {
+			for i := 0; i < b.N; i++ {
+				_ = NewQuery(
+					Bool(
+						Filter(
+							Term("status", "published"),
+							Term("active", "true"),
+						),
+					),
+				)
+			}
+		})
 	})
 } 

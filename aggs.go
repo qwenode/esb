@@ -10,21 +10,22 @@ import (
 type AggregationOption func(*types.Aggregations)
 
 // NewAggregations 通过应用提供的选项创建一个新的 Elasticsearch 聚合。
-// 它返回一个可以直接用于 go-elasticsearch 客户端的 *types.Aggregations。
+// 它返回一个可以直接用于 go-elasticsearch 客户端 Search.Aggregations() 方法的 map[string]types.Aggregations。
 //
 // 示例：
 //   aggs := esb.NewAggregations(
 //       esb.TermsAgg("categories", "category"),
 //       esb.AvgAgg("avg_price", "price"),
 //   )
-func NewAggregations(opts ...AggregationOption) *types.Aggregations {
+//   search.Aggregations(aggs)
+func NewAggregations(opts ...AggregationOption) map[string]types.Aggregations {
 	aggs := &types.Aggregations{
 		Aggregations: make(map[string]types.Aggregations),
 	}
 	for _, opt := range opts {
 		opt(aggs)
 	}
-	return aggs
+	return aggs.Aggregations
 }
 
 // TermsAgg 创建一个词项聚合，用于统计字段的不同值及其文档数量。

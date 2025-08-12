@@ -18,10 +18,10 @@ func Nested(path string, query QueryOption) QueryOption {
     return func(q *types.Query) {
         nestedQuery := &types.Query{}
         query(nestedQuery)
-        
+
         q.Nested = &types.NestedQuery{
             Path:  path,
-            Query: nestedQuery,
+            Query: *nestedQuery,
         }
     }
 }
@@ -45,16 +45,16 @@ func NestedWithOptions(path string, query QueryOption, setOpts func(opts *types.
     return func(q *types.Query) {
         nestedQuery := &types.Query{}
         query(nestedQuery)
-        
+
         nested := &types.NestedQuery{
             Path:  path,
-            Query: nestedQuery,
+            Query: *nestedQuery,
         }
-        
+
         if setOpts != nil {
             setOpts(nested)
         }
-        
+
         q.Nested = nested
     }
 }

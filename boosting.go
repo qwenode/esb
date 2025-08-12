@@ -15,26 +15,26 @@ import "github.com/elastic/go-elasticsearch/v8/typedapi/types"
 //       0.2,                                  // negative_boost
 //   )
 func Boosting(positive, negative QueryOption, negativeBoost float64) QueryOption {
-	return func(q *types.Query) {
-		positiveQuery := &types.Query{}
-		negativeQuery := &types.Query{}
-		
-		if positive != nil {
-			positive(positiveQuery)
-		}
-		
-		if negative != nil {
-			negative(negativeQuery)
-		}
-		
-		negativeBoostFloat := types.Float64(negativeBoost)
-		
-		q.Boosting = &types.BoostingQuery{
-			Positive:      positiveQuery,
-			Negative:      negativeQuery,
-			NegativeBoost: negativeBoostFloat,
-		}
-	}
+    return func(q *types.Query) {
+        positiveQuery := &types.Query{}
+        negativeQuery := &types.Query{}
+
+        if positive != nil {
+            positive(positiveQuery)
+        }
+
+        if negative != nil {
+            negative(negativeQuery)
+        }
+
+        negativeBoostFloat := types.Float64(negativeBoost)
+
+        q.Boosting = &types.BoostingQuery{
+            Positive:      *positiveQuery,
+            Negative:      *negativeQuery,
+            NegativeBoost: negativeBoostFloat,
+        }
+    }
 }
 
 // BoostingWithOptions 提供回调函数式的 Boosting 查询配置。
@@ -53,30 +53,30 @@ func Boosting(positive, negative QueryOption, negativeBoost float64) QueryOption
 //       },
 //   )
 func BoostingWithOptions(positive, negative QueryOption, negativeBoost float64, setOpts func(opts *types.BoostingQuery)) QueryOption {
-	return func(q *types.Query) {
-		positiveQuery := &types.Query{}
-		negativeQuery := &types.Query{}
-		
-		if positive != nil {
-			positive(positiveQuery)
-		}
-		
-		if negative != nil {
-			negative(negativeQuery)
-		}
-		
-		negativeBoostFloat := types.Float64(negativeBoost)
-		
-		boostingQuery := &types.BoostingQuery{
-			Positive:      positiveQuery,
-			Negative:      negativeQuery,
-			NegativeBoost: negativeBoostFloat,
-		}
-		
-		if setOpts != nil {
-			setOpts(boostingQuery)
-		}
-		
-		q.Boosting = boostingQuery
-	}
+    return func(q *types.Query) {
+        positiveQuery := &types.Query{}
+        negativeQuery := &types.Query{}
+
+        if positive != nil {
+            positive(positiveQuery)
+        }
+
+        if negative != nil {
+            negative(negativeQuery)
+        }
+
+        negativeBoostFloat := types.Float64(negativeBoost)
+
+        boostingQuery := &types.BoostingQuery{
+            Positive:      *positiveQuery,
+            Negative:      *negativeQuery,
+            NegativeBoost: negativeBoostFloat,
+        }
+
+        if setOpts != nil {
+            setOpts(boostingQuery)
+        }
+
+        q.Boosting = boostingQuery
+    }
 }

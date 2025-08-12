@@ -13,16 +13,16 @@ import "github.com/elastic/go-elasticsearch/v8/typedapi/types"
 //       esb.Term("status", "published"),
 //   )
 func ConstantScore(filter QueryOption) QueryOption {
-	return func(q *types.Query) {
-		filterQuery := &types.Query{}
-		if filter != nil {
-			filter(filterQuery)
-		}
-		
-		q.ConstantScore = &types.ConstantScoreQuery{
-			Filter: filterQuery,
-		}
-	}
+    return func(q *types.Query) {
+        filterQuery := &types.Query{}
+        if filter != nil {
+            filter(filterQuery)
+        }
+
+        q.ConstantScore = &types.ConstantScoreQuery{
+            Filter: *filterQuery,
+        }
+    }
 }
 
 // ConstantScoreWithOptions 提供回调函数式的 ConstantScore 查询配置。
@@ -37,20 +37,20 @@ func ConstantScore(filter QueryOption) QueryOption {
 //       },
 //   )
 func ConstantScoreWithOptions(filter QueryOption, setOpts func(opts *types.ConstantScoreQuery)) QueryOption {
-	return func(q *types.Query) {
-		filterQuery := &types.Query{}
-		if filter != nil {
-			filter(filterQuery)
-		}
-		
-		constantScoreQuery := &types.ConstantScoreQuery{
-			Filter: filterQuery,
-		}
-		
-		if setOpts != nil {
-			setOpts(constantScoreQuery)
-		}
-		
-		q.ConstantScore = constantScoreQuery
-	}
+    return func(q *types.Query) {
+        filterQuery := &types.Query{}
+        if filter != nil {
+            filter(filterQuery)
+        }
+
+        constantScoreQuery := &types.ConstantScoreQuery{
+            Filter: *filterQuery,
+        }
+
+        if setOpts != nil {
+            setOpts(constantScoreQuery)
+        }
+
+        q.ConstantScore = constantScoreQuery
+    }
 }

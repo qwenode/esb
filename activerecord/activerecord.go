@@ -115,29 +115,22 @@ func (r *ActiveRecord[T]) UpdateEntity(c context.Context, entity T, id string) e
 
 // 局部更新文档
 func (r *ActiveRecord[T]) UpdatePartial(c context.Context, id string, fields map[string]any) error {
-    marshal, err := json.Marshal(fields)
-    if err != nil {
-        return err
-    }
-    h := r.client.Update(r.GetAlias(), id).Doc(marshal)
+
+    h := r.client.Update(r.GetAlias(), id).Doc(fields)
     if r.refresh {
         h.Refresh(refresh.True)
     }
-    _, err = h.Do(c)
+    _, err := h.Do(c)
     return err
 }
 
 // 更新单个字段
 func (r *ActiveRecord[T]) UpdateField(c context.Context, id, field string, value any) error {
-    marshal, err := json.Marshal(map[string]any{field: value})
-    if err != nil {
-        return err
-    }
-    h := r.client.Update(r.GetAlias(), id).Doc(marshal)
+    h := r.client.Update(r.GetAlias(), id).Doc(map[string]any{field: value})
     if r.refresh {
         h.Refresh(refresh.True)
     }
-    _, err = h.Do(c)
+    _, err := h.Do(c)
     return err
 }
 
